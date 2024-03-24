@@ -13,8 +13,19 @@ class DBConnection:
         return self.engine.connect()
 
     def get_dataframe(self):
-        df = pd.read_sql('ListaEBs', self.get_connection())
+        df = pd.read_sql('dataset', self.get_connection())
+        df = df.convert_dtypes()
+        float_columns = [
+            "DiametroExternoEstator [mm]", "ComprimentoExternoCabosLigacao", "CustoIndustrial",
+            "ComprimentoTotalPacote [mm]"
+        ]
+        bool_columns = ["UsoDoTerminal", "ChoqueTermico", "CabosProtecaoTermica"]
+        df[float_columns] = df[float_columns].astype("Float64")
+        df[bool_columns] = df[bool_columns].astype("boolean")
         return df
+
+    def get_dataframe_cleaned(self):
+        raise NotImplementedError
 
 
 if __name__ == "__main__":
