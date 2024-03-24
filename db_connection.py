@@ -1,19 +1,28 @@
 from sqlalchemy import create_engine
+import mysql.connector
 import pandas as pd
 
 
 class DBConnection:
-    def __init__(self):
-        user = 'user1'
-        passwd = 'bE97XnZzmF'
-        self.url = f'mysql://{user}:{passwd}@lced-data.fe.up.pt:3306/weg_a'
-        self.engine = create_engine(self.url, pool_pre_ping=True)
+    def __init__(self, use_mysql=False):
+        self.use_mysql = use_mysql
+        self.user = 'user1'
+        self.passwd = 'bE97XnZzmF'
+        self.host = "lced-data.fe.up.pt"
+        self.database = "weg_a"
+        if not use_mysql:
+            self.url = f'mysql://{self.user}:{self.passwd}@{self.host}:3306/{self.database}'
+            self.engine = create_engine(self.url, pool_pre_ping=True)
 
     def get_connection(self):
+        if self.use_mysql:
+            return mysql.connector.connect(user=self.user, password=self.passwd, host=self.host, database=self.database)
         return self.engine.connect()
 
     def get_dataframe(self):
-        df = pd.read_sql('dataset', self.get_connection())
+        conn = self.get_connection()
+        df = pd.read_sql('dataset', conn)
+        conn.close()
         df = df.convert_dtypes()
         float_columns = [
             "DiametroExternoEstator [mm]", "ComprimentoExternoCabosLigacao", "CustoIndustrial",
