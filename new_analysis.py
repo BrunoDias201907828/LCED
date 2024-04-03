@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import re
+from db_connection import DBConnection
 
 
 def missing_values_column(df):
@@ -108,14 +109,18 @@ def drop_columns(df):
 
 if __name__ == '__main__':
 
-    df = pd.read_csv("ListaEBs.csv")
-    df = remove_duplicated_rows(df)
-    total_null_values = df.isnull().sum().sum()
-    print(total_null_values)
-    df = drop_columns(df)
-    total_null_values = df.isnull().sum().sum()
-    print(total_null_values)
+    db = DBConnection()
+    df = db.get_dataframe()
+    print(df)
 
+
+#    df = remove_duplicated_rows(df)
+#    total_null_values = df.isnull().sum().sum()
+#    print(total_null_values)
+#    df = drop_columns(df)
+#    total_null_values = df.isnull().sum().sum()
+#    print(total_null_values)
+#
 
 
 
@@ -128,8 +133,8 @@ if __name__ == '__main__':
 #distinct_value_counts = df.nunique()
 ##print(distinct_value_counts)
 #
-#column_types = df.dtypes
-##print(column_types)
+column_types = df.dtypes
+print(column_types)
 #
 #columns_to_double = ['DIAMETRO_ANEL_CURTO', 'DIAMETRO_EXTERNO_ESTATOR','DIAMETRO_USINADO_ROTOR','INCLINACAO_ROTOR',
 #                      'LARGURA_ANEL_CURTO','COMPRIMENTO_TOTAL_PACOTE']
