@@ -13,7 +13,7 @@ class DBConnection:
         self.conn.close()
 
     def get_dataframe(self):
-        df = pd.read_sql('SELECT * FROM ListaEBsWPTV2_changed', self.conn)
+        df = pd.read_sql('SELECT * FROM ListaEBs', self.conn)
         return df
 
 
@@ -22,4 +22,4 @@ db=DBConnection()
 cursor = db.cursor
 df = db.get_dataframe()
 
-from IPython import embed; embed()
+#from IPython import embed; embed()
