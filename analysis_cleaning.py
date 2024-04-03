@@ -2,13 +2,37 @@ from db_connection_v2 import DBConnection
 import pandas as pd
 import matplotlib.pyplot as plt
 
+#pd.set_option('display.max_columns', None)
+
 db = DBConnection()
 df = db.get_dataframe()
 
-missing_values = df.isna()
-#print(missing_values)
+#print(df)
+missing_values_per_columns = df.isnull().sum()
+#print(missing_values_per_columns)
+
+missing_values_per_row = df.isnull().sum(axis=1)
+rows_with_missing_values = missing_values_per_row[missing_values_per_row > 1]
+#print("Rows with missing values greater than 0:")
+#print(rows_with_missing_values)
+
+df_cleaned = df.drop(rows_with_missing_values.index)
+#print("DataFrame after dropping rows with more than 1 missing value:")
+#print(df_cleaned)
+
+missing_values = df_cleaned.isna()
 missing_values_per_columns = missing_values.sum()
 #print(missing_values_per_columns)
+
+missing_values_per_row = df_cleaned.isnull().sum(axis=1)
+rows_with_missing_values = missing_values_per_row[missing_values_per_row > 0]
+#print("Rows with missing values greater than 0:")
+#print(rows_with_missing_values)
+
+df_missing_values = df_cleaned.loc[rows_with_missing_values.index]
+#print("DataFrame with rows containing missing values:")
+#print(df_missing_values)
+
 
 distinct_value_counts = df.nunique()
 print(distinct_value_counts)
