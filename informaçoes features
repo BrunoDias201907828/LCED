@@ -35,3 +35,6 @@ Talvez apagar?
 
 TIPO ALUMINIO(está no dicionário, deixou de existir?)
 TIPO_DE_IMPREGNACAO (4 tipos, mas 2 deles só acontecem 1 vez)
+
+
+sklearn.impute.SimpleImputer pode ser usada para completar null values
