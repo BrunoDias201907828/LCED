@@ -109,9 +109,9 @@ def drop_columns(df):
 
 if __name__ == '__main__':
 
-    #db = DBConnection()
-    #df = db.get_dataframe()
-    df = pd.read_csv("ListaEBs.csv")
+    db = DBConnection()
+    df = db.get_dataframe()
+    #df = pd.read_csv("ListaEBs.csv")
     print(df)
 
 
