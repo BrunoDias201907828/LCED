@@ -1,3 +1,4 @@
+from external_data import FeatureExtractor
 from sqlalchemy import create_engine
 import mysql.connector
 import pandas as pd
@@ -39,12 +40,21 @@ class DBConnection:
     def get_dataframe_cleaned(self):
         raise NotImplementedError
 
+    def get_dataframe_with_extracted_features(self):
+        try:
+            df = self.get_dataframe_cleaned()
+        except NotImplementedError:
+            df = self.get_dataframe()
+        extractor = FeatureExtractor()
+        df_ext = extractor.extract_features()
+        return (
+            pd.merge(df, df_ext, left_on="DataCriacao", right_index=True, how="left").
+            drop(columns=["DataCriacao"])
+        )
+
 
 if __name__ == "__main__":
     db = DBConnection()
-    df = db.get_dataframe()
-
-    db = DBConnection(use_mysql=True)
-    df = db.get_dataframe()
+    df = db.get_dataframe_with_extracted_features()
 
     from IPython import embed; embed()
