@@ -1,4 +1,5 @@
 from external_data import FeatureExtractor
+from clean_dataframe import df_changed
 from sqlalchemy import create_engine
 import mysql.connector
 import pandas as pd
@@ -38,7 +39,8 @@ class DBConnection:
         return df
 
     def get_dataframe_cleaned(self):
-        raise NotImplementedError
+        df = df_changed(self.get_dataframe())
+        return df
 
     def get_dataframe_with_extracted_features(self):
         try:
