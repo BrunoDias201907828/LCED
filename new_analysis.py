@@ -12,7 +12,6 @@ def missing_values_column(df):
 
     missing_info = pd.concat([missing_values_per_column, missing_percentage_per_column], axis=1)
     missing_info.columns = ['Missing Values Count', 'Percentage']
-
     return missing_info
 
 def missing_values_row(df):
@@ -21,7 +20,6 @@ def missing_values_row(df):
 
     missing_info = pd.concat([missing_values_per_row, missing_percentage_per_row], axis=1)
     missing_info.columns = ['Missing Values Count', 'Percentage']
-
     return missing_info
 
 def get_duplicate_rows(df):
@@ -29,14 +27,11 @@ def get_duplicate_rows(df):
     df = df[duplicate_rows]
     return df
 
-
 def get_rows_with_less_null_values(df):
-
     df = df.copy()
     missing_values_per_row = df.isnull().sum(axis=1)
     df['missing_values'] = missing_values_per_row
     df = df.sort_values(by='missing_values')
-
     return df
 
 def remove_duplicated_rows(df):
@@ -64,7 +59,6 @@ def print_value_counts(df):
         print(f"Column: {column}")
         print(df[column].value_counts())
         print("\n")
-
 
 def drop_columns(df):
     columns_to_remove = ['NumeroDeFases', 'ProcessoFabricacao', 'NivelRendEficiencia', 'CodigoMaterial', 'CodigoMaterialFio01Enrol01', 'NumeroDesenho', 'TerminalLigacao']
@@ -100,21 +94,25 @@ def convert_cols_to_boolean(df):
     return df
 
 def replace_single_occurrences(df):
-    for column in df.columns:
+    columns = df.columns.tolist()
+    columns.remove('CustoIndustrial')
+    for column in columns:
         counts = df[column].value_counts()
         df[column] = df[column].map(lambda x: x if pd.isna(x) else ('Outros' if counts[x] == 1 else x))
     return df
 
-if __name__ == '__main__':
-
-    db = DBConnection()
-    df = db.get_dataframe()
-
+def df_changed(df):
     df = remove_duplicated_rows(df)
     df = drop_columns(df)    
     df = df.drop(3882)
     df = convert_cols_to_int(df)
     df = convert_cols_to_boolean(df)
-    #print_value_counts(df)
-    #df = replace_single_occurrences(df)
-    #print_value_counts(df)
+    df = replace_single_occurrences(df)
+
+    return df
+if __name__ == '__main__':
+
+    db = DBConnection()
+    df = db.get_dataframe()
+
+    df = df_changed(df)
