@@ -20,23 +20,16 @@ Binárias:
 	TIPO ESTATOR BOBINADO (É BINÁRIA) DONE
 	TIPO_LIGACAO_PROTECAO_TERMICA(É BINÁRIA) DONE
 	USO_DO_TERMINAL (É BINÁRIA) (boleana) DONE
+	NUMERO_ENROLAMENTOS_MOTOR DONE
 
-	boolean
+
 	em codigos agrupar num grupo outros todos os que têm menos de 1
-
-	NUMERO_ENROLAMENTOS_MOTOR(É BINÁRIA MAS JÁ ESTÁ COM NUMEROS, NÃO MEXER)
-
-
 
 Talvez apagar?
 	MOTOR_COMPLETO (apagar? nem está no dicionário) - nao apagar mas nao incluir no primeiro modelo
 	ID_ESTATOR_INSERTADO (é u ID mas não sei se será util)
 	DATA CRIAÇAO? SÓ SERVE PARA DADOS EXTERNOS (CUSTO DÁ UPDATE AUTOMATICAMENTE, PODEMOS ELIMINAR NÃO?)
 
-
-
-
-TIPO ALUMINIO(está no dicionário, deixou de existir?)
 TIPO_DE_IMPREGNACAO (4 tipos, mas 2 deles só acontecem 1 vez)
 
 

@@ -76,10 +76,15 @@ def replace_strings(df, column, str1, str2):
     df[column] = df[column].astype('Int64')
     return df
 
+def replace_values(df, column, val1, val2):
+    df[column] = df[column].replace({val1: 0, val2: 1})
+    return df
+
 def convert_cols_to_int(df):
     df = replace_strings(df, 'TipoEstatorBobinado', 'DE LINHA ESPECIAL', 'DE TABELA DE VALORES')
     df = replace_strings(df, 'TipoLigacaoProtecaoTermica', 'INDEPENDENTE', 'SERIE')
     df = replace_strings(df, 'ClassIsolamento', 'F', 'H')
+    df = replace_values(df, 'NumeroEnrolamentoMotor', 1, 2) 
     return df
 
 def convert_to_boolean(df, column):
@@ -91,6 +96,13 @@ def convert_cols_to_boolean(df):
     df = convert_to_boolean(df, 'TipoLigacaoProtecaoTermica')
     df = convert_to_boolean(df, 'ClassIsolamento')
     df = convert_to_boolean(df, 'CabosLigacaoEmParalelo')
+    df = convert_to_boolean(df, 'NumeroEnrolamentoMotor')
+    return df
+
+def replace_single_occurrences(df):
+    for column in df.columns:
+        counts = df[column].value_counts()
+        df[column] = df[column].map(lambda x: x if pd.isna(x) else ('Outros' if counts[x] == 1 else x))
     return df
 
 if __name__ == '__main__':
@@ -98,15 +110,11 @@ if __name__ == '__main__':
     db = DBConnection()
     df = db.get_dataframe()
 
-
     df = remove_duplicated_rows(df)
     df = drop_columns(df)    
     df = df.drop(3882)
     df = convert_cols_to_int(df)
-
-    print(f"Column: {'CabosLigacaoEmParalelo'}")
-    print(df['CabosLigacaoEmParalelo'].value_counts())
     df = convert_cols_to_boolean(df)
-    print(f"Column: {'CabosLigacaoEmParalelo'}")
-    print(df['CabosLigacaoEmParalelo'].value_counts())
-
+    #print_value_counts(df)
+    #df = replace_single_occurrences(df)
+    #print_value_counts(df)
