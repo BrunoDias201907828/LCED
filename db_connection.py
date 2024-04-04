@@ -21,7 +21,10 @@ class DBConnection:
 
     def get_dataframe(self):
         conn = self.get_connection()
-        df = pd.read_sql('dataset', conn)
+        if self.use_mysql:
+            df = pd.read_sql('SELECT * FROM DatasetWithCost', conn)
+        else:
+            df = pd.read_sql('DatasetWithCost', conn)
         conn.close()
         df = df.convert_dtypes()
         float_columns = [
@@ -40,4 +43,8 @@ class DBConnection:
 if __name__ == "__main__":
     db = DBConnection()
     df = db.get_dataframe()
+
+    db = DBConnection(use_mysql=True)
+    df = db.get_dataframe()
+
     from IPython import embed; embed()
