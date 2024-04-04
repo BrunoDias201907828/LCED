@@ -109,8 +109,9 @@ def drop_columns(df):
 
 if __name__ == '__main__':
 
-    db = DBConnection()
-    df = db.get_dataframe()
+    #db = DBConnection()
+    #df = db.get_dataframe()
+    df = pd.read_csv("ListaEBs.csv")
     print(df)
 
 
@@ -133,8 +134,8 @@ if __name__ == '__main__':
 #distinct_value_counts = df.nunique()
 ##print(distinct_value_counts)
 #
-column_types = df.dtypes
-print(column_types)
+#column_types = df.dtypes
+#print(column_types)
 #
 #columns_to_double = ['DIAMETRO_ANEL_CURTO', 'DIAMETRO_EXTERNO_ESTATOR','DIAMETRO_USINADO_ROTOR','INCLINACAO_ROTOR',
 #                      'LARGURA_ANEL_CURTO','COMPRIMENTO_TOTAL_PACOTE']
