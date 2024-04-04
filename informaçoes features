@@ -8,18 +8,18 @@ APAGAR:
 	CODIGO_DESENHO_ESTATOR_COMPLET (apagar, codigo de desenho num sistema qq) - done	NAO DESCARTAR
 	NUMERO_DE_FASES (sempre o mesmo) - done
 	PROCESSO_FABRICACAO (sempre o mesmo) - done
+	TerminalLigacao
 
 Apenas 716 Null values depois disto
 
 Binárias:
-	CABOS_LIGACAO_EM_PARALELO (esta é binária)
-	CABOS_PROTECAO_TERMICA (esta é boleana)
-	CHOQUE_TERMICO (esta é boleana)
-	CLASSE_ISOLAMENTO (esta é binária)
-	TERMINAL_LIGACAO (esta é boleana)
-	TIPO ESTATOR BOBINADO (É BINÁRIA)
-	TIPO_LIGACAO_PROTECAO_TERMICA(É BINÁRIA)
-	USO_DO_TERMINAL (É BINÁRIA) (boleana)
+	CABOS_LIGACAO_EM_PARALELO (esta é binária) DONE
+	CABOS_PROTECAO_TERMICA (esta é boleana) DONE
+	CHOQUE_TERMICO (esta é boleana) DONE
+	CLASSE_ISOLAMENTO (esta é binária) DONE
+	TIPO ESTATOR BOBINADO (É BINÁRIA) DONE
+	TIPO_LIGACAO_PROTECAO_TERMICA(É BINÁRIA) DONE
+	USO_DO_TERMINAL (É BINÁRIA) (boleana) DONE
 
 	boolean
 	em codigos agrupar num grupo outros todos os que têm menos de 1

@@ -25,7 +25,7 @@ def missing_values_row(df):
     return missing_info
 
 def get_duplicate_rows(df):
-    duplicate_rows = df.duplicated(subset='Cod_do_Material', keep=False)
+    duplicate_rows = df.duplicated(subset='CodigoMaterial', keep=False)
     df = df[duplicate_rows]
     return df
 
@@ -42,11 +42,11 @@ def get_rows_with_less_null_values(df):
 def remove_duplicated_rows(df):
 
     df_duplicated = get_duplicate_rows(df)
-    distinct_values_list = df_duplicated['Cod_do_Material'].unique().tolist()
+    distinct_values_list = df_duplicated['CodigoMaterial'].unique().tolist()
     new_df = pd.DataFrame()
 
     for cod in distinct_values_list:
-        less_null = get_rows_with_less_null_values(df_duplicated[df_duplicated['Cod_do_Material'] == cod])
+        less_null = get_rows_with_less_null_values(df_duplicated[df_duplicated['CodigoMaterial'] == cod])
         new_df = pd.concat([new_df, less_null.iloc[[0]]])  
 
     df_keep = new_df.drop(columns=['missing_values'])
@@ -59,42 +59,6 @@ def remove_duplicated_rows(df):
 
     return df_distinct
 
-def convert_value_to_double(value):
-    if pd.isnull(value):
-        return np.nan  
-    
-    value = value.replace(",", ".")
-
-    if value.count('.') > 1:
-        last_dot_index = value.rindex('.')
-        cleaned_value = value[:last_dot_index].replace('.', '') + value[last_dot_index:]
-    else:
-        cleaned_value = value
-
-    cleaned_value = re.sub(r'[^\d.]+', '', cleaned_value)
-    double_value = float(cleaned_value)
-    
-    return double_value
-
-def convert_to_double(df, columns):
-    for column in columns:
-        df[column] = df[column].apply(convert_value_to_double)
-    return df
-
-def convert_value_to_int(value):
-    if pd.isnull(value):
-        return np.nan  
-    
-    cleaned_value = re.sub(r'\D+', '', value)
-    int_value = int(cleaned_value)
-    
-    return int_value
-
-def convert_to_int(df, columns):
-    for column in columns:
-        df[column] = df[column].apply(convert_value_to_int)
-    return df
-
 def print_value_counts(df):
     for column in df.columns:
         print(f"Column: {column}")
@@ -103,56 +67,46 @@ def print_value_counts(df):
 
 
 def drop_columns(df):
-    columns_to_remove = ['NUMERO_DE_FASES', 'PROCESSO_FABRICACAO', 'NIVEL_REND_EFICIENCIA_-_EFF', 'Cod_do_Material', 'COD_MATERIAL_FIO_01_ENROL_01', 'CODIGO_DESENHO_ESTATOR_COMPLET', 'NUMERO_DESENHO', 'COD_DESENHO_DISCO_ROTOR', 'COD_DESENHO_DISCO_ESTATOR']
+    columns_to_remove = ['NumeroDeFases', 'ProcessoFabricacao', 'NivelRendEficiencia', 'CodigoMaterial', 'CodigoMaterialFio01Enrol01', 'NumeroDesenho', 'TerminalLigacao']
     df = df.drop(columns_to_remove, axis=1)
+    return df
+
+def replace_strings(df, column, str1, str2):
+    df[column] = df[column].replace({str1: '0', str2: '1'})
+    df[column] = df[column].astype('Int64')
+    return df
+
+def convert_cols_to_int(df):
+    df = replace_strings(df, 'TipoEstatorBobinado', 'DE LINHA ESPECIAL', 'DE TABELA DE VALORES')
+    df = replace_strings(df, 'TipoLigacaoProtecaoTermica', 'INDEPENDENTE', 'SERIE')
+    df = replace_strings(df, 'ClassIsolamento', 'F', 'H')
+    return df
+
+def convert_to_boolean(df, column):
+    df[column] = df[column].astype('boolean')
+    return df
+
+def convert_cols_to_boolean(df):
+    df = convert_to_boolean(df, 'TipoEstatorBobinado')
+    df = convert_to_boolean(df, 'TipoLigacaoProtecaoTermica')
+    df = convert_to_boolean(df, 'ClassIsolamento')
+    df = convert_to_boolean(df, 'CabosLigacaoEmParalelo')
     return df
 
 if __name__ == '__main__':
 
     db = DBConnection()
     df = db.get_dataframe()
-    #df = pd.read_csv("ListaEBs.csv")
-    print(df)
 
 
-#    df = remove_duplicated_rows(df)
-#    total_null_values = df.isnull().sum().sum()
-#    print(total_null_values)
-#    df = drop_columns(df)
-#    total_null_values = df.isnull().sum().sum()
-#    print(total_null_values)
-#
+    df = remove_duplicated_rows(df)
+    df = drop_columns(df)    
+    df = df.drop(3882)
+    df = convert_cols_to_int(df)
 
+    print(f"Column: {'CabosLigacaoEmParalelo'}")
+    print(df['CabosLigacaoEmParalelo'].value_counts())
+    df = convert_cols_to_boolean(df)
+    print(f"Column: {'CabosLigacaoEmParalelo'}")
+    print(df['CabosLigacaoEmParalelo'].value_counts())
 
-
-
-
-
-
-
-
-#distinct_value_counts = df.nunique()
-##print(distinct_value_counts)
-#
-#column_types = df.dtypes
-#print(column_types)
-#
-#columns_to_double = ['DIAMETRO_ANEL_CURTO', 'DIAMETRO_EXTERNO_ESTATOR','DIAMETRO_USINADO_ROTOR','INCLINACAO_ROTOR',
-#                      'LARGURA_ANEL_CURTO','COMPRIMENTO_TOTAL_PACOTE']
-#
-#columns_to_int = ['BITOLA_CABO_ATERRAMEN_CAR CACA','BITOLA_CABOS_DE_LIGACAO']
-#
-#df_aux = convert_to_int(df, columns_to_int)
-#df_converted = convert_to_double(df_aux, columns_to_double)
-#column_types = df_converted.dtypes
-##print(column_types)
-#
-#numeric_columns = df_converted.select_dtypes(include=['int64', 'float64'])
-#numeric_columns = numeric_columns.drop(columns=['Cod_do_Material'])
-#
-#correlation_matrix = numeric_columns.corr()
-#
-#plt.figure(figsize=(12, 8))
-#sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f")
-#plt.title('Correlation Matrix of Numeric Columns')
-#plt.show()
