@@ -113,6 +113,5 @@ def df_changed(df):
 if __name__ == '__main__':
 
     db = DBConnection()
-    df = db.get_dataframe()
-
+    df = db.get_dataframe_with_extracted_features()
     df = df_changed(df)
