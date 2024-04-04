@@ -104,7 +104,7 @@ def replace_single_occurrences(df):
 def df_changed(df):
     df = remove_duplicated_rows(df)
     df = drop_columns(df)    
-    df = df.drop(3882)
+    df = df.drop([2478,3882])
     df = convert_cols_to_int(df)
     df = convert_cols_to_boolean(df)
     df = replace_single_occurrences(df)
@@ -139,16 +139,17 @@ if __name__ == '__main__':
     df = db.get_dataframe_with_extracted_features()
     df = df_changed(df)
 
-    #missing_rows_count = df.isnull().any(axis=1).sum()
-    #print("Number of rows with at least one missing value:", missing_rows_count)
+    missing_rows_count = df.isnull().any(axis=1).sum()
+    print("Number of rows with at least one missing value:", missing_rows_count)
+
+    n_rows = df.shape[0]
+    print(n_rows)
 
     #miss_col = missing_values_column(df)
     #print(miss_col)
-    miss_row = rows_with_missing_values(df)
-    print(miss_row)
+    #miss_row = rows_with_missing_values(df)
+    #print(miss_row)
     
-    missing_values_heatmap(df)
+    #missing_values_heatmap(df)
 
     #print_value_counts(df)
-
-    #print(df.loc[2478]) 

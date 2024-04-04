@@ -36,4 +36,32 @@ TIPO_DE_IMPREGNACAO (4 tipos, mas 2 deles só acontecem 1 vez)
 sklearn.impute.SimpleImputer pode ser usada para completar null values
 
 
-DROP USO TERMINAL OU TERMINAL_LIGACAO E ELIMINAR LINHA
+- 'outros' clustering perhaps does not make sense for QuantidadeComponente 
+
+- there is only 1 in 'outros' so maybe keep original value?
+BitolaCaboAterramentoCarcaca [mm2];
+CarcacaPlataformaEletricaRaw;
+CarcacaPlataformaEletricaComprimento;
+DiametroExternoEstator [mm];
+PolaridadeChapa;
+
+columns TipoLigacaoProtecaoTermica and CabosProtecaoTermica seem to coincide missing values, 
+maybe in some products this information does not make sense to record,
+maybe add a new value to represent products which don't have this features,
+try to see if it is related to any column
+
+BitolaCaboAterramentoCarcaca [mm2] missing values seem to be all for older data so not MCAR, MCAR
+can't delete lines, it will induce bias, so imputation by (?),
+or check for correlations with other variables
+
+DiametroExternoEstator [mm] same thing but for more recent data,
+does not make sense maybe to do imputation,
+try to correlate to other diameters and measures
+
+IdEstatortInsertado same thing as DiametroExternoEstator,
+try to see if it is related to any column,
+maybe nulls can be a cluster
+
+For other columns if there are few remaining, consider dropping rows
+
+
