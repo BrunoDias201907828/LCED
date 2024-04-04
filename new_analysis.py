@@ -7,7 +7,7 @@ from db_connection import DBConnection
 
 
 def missing_values_column(df):
-    missing_values_per_column = df.isnull().sum(axis=1)
+    missing_values_per_column = df.isnull().sum()
     missing_percentage_per_column = ((missing_values_per_column / len(df)) * 100).round(2)
 
     missing_info = pd.concat([missing_values_per_column, missing_percentage_per_column], axis=1)
@@ -16,7 +16,7 @@ def missing_values_column(df):
 
 def missing_values_row(df):
     missing_values_per_row = df.isnull().sum(axis=1)
-    missing_percentage_per_row = (missing_values_per_row / len(df.columns)) * 100
+    missing_percentage_per_row = ((missing_values_per_row / len(df.columns)) * 100).round(2)
 
     missing_info = pd.concat([missing_values_per_row, missing_percentage_per_row], axis=1)
     missing_info.columns = ['Missing Values Count', 'Percentage']
@@ -110,8 +110,45 @@ def df_changed(df):
     df = replace_single_occurrences(df)
 
     return df
+
+def rows_with_missing_values(df): #in this one we can filter by n of missing values
+    missing_values_per_row = df.isnull().sum(axis=1)
+    missing_percentage_per_row = ((missing_values_per_row / len(df.columns)) * 100).round(2)
+
+    missing_info = pd.concat([missing_values_per_row, missing_percentage_per_row], axis=1)
+    missing_info.columns = ['Missing Values Count', 'Percentage']
+
+    filtered_missing_info = missing_info[missing_info['Missing Values Count'] > 2]
+
+    return filtered_missing_info
+
+def missing_values_heatmap(df): #only for columns and rows where there are missing values, not whole df
+    missing_rows = df[df.isnull().any(axis=1)]
+    missing_cols = missing_rows.loc[:, missing_rows.isnull().any()]
+
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(missing_cols.isnull(), cmap='viridis', cbar=False)
+    plt.title('Missing Values Heatmap')
+    plt.xlabel('Columns')
+    plt.ylabel('Rows')
+    plt.show()
+
 if __name__ == '__main__':
 
     db = DBConnection()
     df = db.get_dataframe_with_extracted_features()
     df = df_changed(df)
+
+    #missing_rows_count = df.isnull().any(axis=1).sum()
+    #print("Number of rows with at least one missing value:", missing_rows_count)
+
+    #miss_col = missing_values_column(df)
+    #print(miss_col)
+    miss_row = rows_with_missing_values(df)
+    print(miss_row)
+    
+    missing_values_heatmap(df)
+
+    #print_value_counts(df)
+
+    #print(df.loc[2478]) 
