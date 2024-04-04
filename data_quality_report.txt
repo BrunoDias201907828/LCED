@@ -8,7 +8,7 @@ Check for errors and inconsistencies in the data; no errors found I think (see i
 
 How are missing values represented? Blanks
 Get missing values count by column and row
-Why is it missing? Data entry error maybe
+Why is it missing? Data entry error maybe? some columns may have missing data because those values do not make sense in the construction of some components
 Evaluate the impact of missing values
 
 Data quality metrics: missing values percentage
