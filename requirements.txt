@@ -1,0 +1,8 @@
+pandas
+numpy
+matplotlib
+sqlalchemy
+scikit-learn
+mlflow
+mysql-connector-python
+yfinance
