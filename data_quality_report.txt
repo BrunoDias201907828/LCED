@@ -4,6 +4,8 @@
 
 Check for errors and inconsistencies in the data; no errors found I think (see in frequency of values and distribution)
 
+Falar de dados de uma certa data para trás não terem um dado valor, podendo ser um problema de um sistema antigo, ou falha na passagem de um sistema para outro?
+
 - Missing values examination
 
 How are missing values represented? Blanks

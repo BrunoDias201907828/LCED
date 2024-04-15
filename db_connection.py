@@ -39,6 +39,9 @@ class DBConnection:
 
     def get_dataframe_cleaned(self):
         raise NotImplementedError
+        from new_analysis import df_changed
+        df = df_changed(self.get_dataframe())
+        return df
 
     def get_dataframe_with_extracted_features(self):
         try:
@@ -55,6 +58,8 @@ class DBConnection:
 
 if __name__ == "__main__":
     db = DBConnection()
-    df = db.get_dataframe_with_extracted_features()
+    df = db.get_dataframe()
+    df_clean = db.get_dataframe_cleaned()
+    #df = db.get_dataframe_with_extracted_features()
 
     from IPython import embed; embed()
