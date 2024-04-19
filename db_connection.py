@@ -1,6 +1,10 @@
 from external_data import FeatureExtractor
 from sqlalchemy import create_engine
-import mysql.connector
+try:
+    import mysql.connector
+    MYSQLCONNECTOR = True
+except ImportError:
+    MYSQLCONNECTOR = False
 import pandas as pd
 
 
