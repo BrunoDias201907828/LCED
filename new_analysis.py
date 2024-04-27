@@ -61,7 +61,7 @@ def print_value_counts(df):
         print("\n")
 
 def drop_columns(df):
-    columns_to_remove = ['NumeroDeFases', 'ProcessoFabricacao', 'NivelRendEficiencia', 'CodigoMaterial', 'CodigoMaterialFio01Enrol01', 'NumeroDesenho', 'TerminalLigacao']
+    columns_to_remove = ['NumeroDeFases', 'ProcessoFabricacao', 'NivelRendEficiencia', 'CodigoMaterial', 'CodigoMaterialFio01Enrol01', 'NumeroDesenho', 'TerminalLigacao', 'IdEstatortInsertado']
     df = df.drop(columns_to_remove, axis=1)
     return df
 
@@ -128,8 +128,8 @@ def df_changed(df):
     df = remove_duplicated_rows(df)
     df = drop_columns(df)    
     df = df.drop([2478,3882])
-    df = convert_cols_to_int(df)
-    df = convert_cols_to_boolean(df)
+    #df = convert_cols_to_int(df)
+    #df = convert_cols_to_boolean(df)
     #df = replace_single_occurrences(df)
 
     return df
@@ -143,24 +143,24 @@ if __name__ == '__main__':
     db = DBConnection()
     df = db.get_dataframe_with_extracted_features()
 
-    selected_columns_df = select_columns(df, ['Descricao', 'CabosProtecaoTermica', 'TipoLigacaoProtecaoTermica'])
-    na_rows_df = selected_columns_df[selected_columns_df['CabosProtecaoTermica'].isna() | selected_columns_df['TipoLigacaoProtecaoTermica'].isna()]
+    #selected_columns_df = select_columns(df, ['Descricao', 'CabosProtecaoTermica', 'TipoLigacaoProtecaoTermica'])
+    #na_rows_df = selected_columns_df[selected_columns_df['CabosProtecaoTermica'].isna() | selected_columns_df['TipoLigacaoProtecaoTermica'].isna()]
 
-    #df_change = df_changed(df)
-    #print((~(df_change.dtypes == df.dtypes)).sum())
+    df_change = df_changed(df)
+    #df_change = df_change.drop(columns=['TipoLigacaoProtecaoTermica', 'CabosProtecaoTermica'])
+
+    na_carcaca_df = df[df['BitolaCaboAterramentoCarcaca [mm2]'].isna()]
+    na_diametro_externo_estator_df = df[df['DiametroExternoEstator [mm]'].isna()]
+    na_carcaca_df = na_carcaca_df['CodigoComponente']
+    na_diametro_externo_estator_df = na_diametro_externo_estator_df['CodigoComponente']
+    na_carcaca_df.to_csv('na_carcaca.csv', index=False)
+    na_diametro_externo_estator_df.to_csv('na_diametro_externo_estator.csv', index=False)
+
+
     from IPython import embed; embed()
 
     #missing_rows_count = df.isnull().any(axis=1).sum()
     #print("Number of rows with at least one missing value:", missing_rows_count)
 
-    #n_rows = df.shape[0]
-    #print(n_rows)
-
-    #miss_col = missing_values_column(df)
-    #print(miss_col)
-    #miss_row = rows_with_missing_values(df)
-    #print(miss_row)
     
-    #missing_values_heatmap(df)
-
-    #print_value_counts(df)
+    missing_values_heatmap(df_change)
