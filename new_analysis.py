@@ -6,22 +6,6 @@ import re
 from db_connection import DBConnection
 
 
-def missing_values_column(df):
-    missing_values_per_column = df.isnull().sum()
-    missing_percentage_per_column = ((missing_values_per_column / len(df)) * 100).round(2)
-
-    missing_info = pd.concat([missing_values_per_column, missing_percentage_per_column], axis=1)
-    missing_info.columns = ['Missing Values Count', 'Percentage']
-    return missing_info
-
-def missing_values_row(df):
-    missing_values_per_row = df.isnull().sum(axis=1)
-    missing_percentage_per_row = ((missing_values_per_row / len(df.columns)) * 100).round(2)
-
-    missing_info = pd.concat([missing_values_per_row, missing_percentage_per_row], axis=1)
-    missing_info.columns = ['Missing Values Count', 'Percentage']
-    return missing_info
-
 def get_duplicate_rows(df):
     duplicate_rows = df.duplicated(subset='CodigoMaterial', keep=False)
     df = df[duplicate_rows]
@@ -76,7 +60,6 @@ def replace_values(df, column, val1, val2):
 
 def convert_cols_to_int(df):
     df = replace_strings(df, 'TipoEstatorBobinado', 'DE LINHA ESPECIAL', 'DE TABELA DE VALORES')
-    df = replace_strings(df, 'TipoLigacaoProtecaoTermica', 'INDEPENDENTE', 'SERIE')
     df = replace_strings(df, 'ClassIsolamento', 'F', 'H')
     df = replace_values(df, 'NumeroEnrolamentoMotor', 1, 2) 
     return df
@@ -87,7 +70,6 @@ def convert_to_boolean(df, column):
 
 def convert_cols_to_boolean(df):
     df = convert_to_boolean(df, 'TipoEstatorBobinado')
-    df = convert_to_boolean(df, 'TipoLigacaoProtecaoTermica')
     df = convert_to_boolean(df, 'ClassIsolamento')
     df = convert_to_boolean(df, 'CabosLigacaoEmParalelo')
     df = convert_to_boolean(df, 'NumeroEnrolamentoMotor')
@@ -128,8 +110,8 @@ def df_changed(df):
     df = remove_duplicated_rows(df)
     df = drop_columns(df)    
     df = df.drop([2478,3882])
-    #df = convert_cols_to_int(df)
-    #df = convert_cols_to_boolean(df)
+    df = convert_cols_to_int(df)
+    df = convert_cols_to_boolean(df)
     #df = replace_single_occurrences(df)
 
     return df
@@ -142,25 +124,15 @@ if __name__ == '__main__':
 
     db = DBConnection()
     df = db.get_dataframe_with_extracted_features()
-
+    
     #selected_columns_df = select_columns(df, ['Descricao', 'CabosProtecaoTermica', 'TipoLigacaoProtecaoTermica'])
     #na_rows_df = selected_columns_df[selected_columns_df['CabosProtecaoTermica'].isna() | selected_columns_df['TipoLigacaoProtecaoTermica'].isna()]
 
     df_change = df_changed(df)
     #df_change = df_change.drop(columns=['TipoLigacaoProtecaoTermica', 'CabosProtecaoTermica'])
 
-    na_carcaca_df = df[df['BitolaCaboAterramentoCarcaca [mm2]'].isna()]
-    na_diametro_externo_estator_df = df[df['DiametroExternoEstator [mm]'].isna()]
-    na_carcaca_df = na_carcaca_df['CodigoComponente']
-    na_diametro_externo_estator_df = na_diametro_externo_estator_df['CodigoComponente']
-    na_carcaca_df.to_csv('na_carcaca.csv', index=False)
-    na_diametro_externo_estator_df.to_csv('na_diametro_externo_estator.csv', index=False)
-
+    #Fazer imputaçao a 'BitolaCaboAterramentoCarcaca [mm2]' e a 'DiametroExternoEstator [mm]'
 
     from IPython import embed; embed()
-
-    #missing_rows_count = df.isnull().any(axis=1).sum()
-    #print("Number of rows with at least one missing value:", missing_rows_count)
-
     
     missing_values_heatmap(df_change)
