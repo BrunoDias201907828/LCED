@@ -83,16 +83,11 @@ def replace_single_occurrences(df):
         df[column] = df[column].map(lambda x: x if pd.isna(x) else ('Outros' if counts[x] == 1 else x))
     return df
 
-def rows_with_missing_values(df): #in this one we can filter by n of missing values
-    missing_values_per_row = df.isnull().sum(axis=1)
-    missing_percentage_per_row = ((missing_values_per_row / len(df.columns)) * 100).round(2)
-
-    missing_info = pd.concat([missing_values_per_row, missing_percentage_per_row], axis=1)
-    missing_info.columns = ['Missing Values Count', 'Percentage']
-
-    filtered_missing_info = missing_info[missing_info['Missing Values Count'] > 2]
-
-    return filtered_missing_info
+def termica_solved(df):
+    #df['CabosProtecaoTermica']=df['CabosProtecaoTermica'].astype(str)
+    df['TipoLigacaoProtecaoTermica'] = df['TipoLigacaoProtecaoTermica'].fillna('Nao Aplicavel')
+    df['CabosProtecaoTermica'] = df['CabosProtecaoTermica'].astype('string').fillna('Nao Aplicavel')
+    return df
 
 def missing_values_heatmap(df): #only for columns and rows where there are missing values, not whole df
     missing_rows = df[df.isnull().any(axis=1)]
@@ -112,6 +107,7 @@ def df_changed(df):
     df = df.drop([2478,3882])
     df = convert_cols_to_int(df)
     df = convert_cols_to_boolean(df)
+    df = termica_solved(df)
     #df = replace_single_occurrences(df)
 
     return df
@@ -129,10 +125,12 @@ if __name__ == '__main__':
     #na_rows_df = selected_columns_df[selected_columns_df['CabosProtecaoTermica'].isna() | selected_columns_df['TipoLigacaoProtecaoTermica'].isna()]
 
     df_change = df_changed(df)
+
+    # ChoqueTermico DiametroAnelCurto [mm] DiametroUsinadoRotor [mm] LarguraAnelCurto [mm] NrTotalFiosEnrol TipoDeImpregnacao
+
     #df_change = df_change.drop(columns=['TipoLigacaoProtecaoTermica', 'CabosProtecaoTermica'])
 
     #Fazer imputaçao a 'BitolaCaboAterramentoCarcaca [mm2]' e a 'DiametroExternoEstator [mm]'
 
     from IPython import embed; embed()
     
-    missing_values_heatmap(df_change)
