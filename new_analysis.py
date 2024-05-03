@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import pandas as pd
+from sklearn.preprocessing import OrdinalEncoder
 
 
 def get_duplicate_rows(df):
@@ -85,25 +86,33 @@ def termica_solved(df):
     df['CabosProtecaoTermica'] = df['CabosProtecaoTermica'].astype('string').fillna('Nao Aplicavel')
     return df
 
-def missing_values_heatmap(df): #only for columns and rows where there are missing values, not whole df
-    missing_rows = df[df.isnull().any(axis=1)]
-    missing_cols = missing_rows.loc[:, missing_rows.isnull().any()]
+def apply_ordinal_encoding(df, columns):
+    encoder = OrdinalEncoder()
+    df[columns] = encoder.fit_transform(df[columns])
+    return df
 
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(missing_cols.isnull(), cmap='viridis', cbar=False)
-    plt.title('Missing Values Heatmap')
-    plt.xlabel('Columns')
-    plt.ylabel('Rows')
-    plt.show()
-
+def drop_na_rows_inplace(df):
+    df.dropna(inplace=True)
 
 def df_changed(df):
+
+
     df = remove_duplicated_rows(df)
     df = drop_columns(df)    
     df = df.drop([2478,3882])
     df = convert_cols_to_int(df)
     df = convert_cols_to_boolean(df)
     df = termica_solved(df)
+    
+    drop_na_rows_inplace(df)
+
+    columns_to_encode = ["Descricao", "DescricaoComponente", "CabosProtecaoTermica", "CarcacaPlataformaEletricaRaw", 
+                     "CarcacaPlataformaEletricaComprimento", "CodigoDesenhoEstatorCompleto", "CodigoDesenhoDiscoEstator", 
+                     "CodigoDesenhoDiscoRotor", "EsquemaBobinagem", "GrupoCarcaca", "LigacaoDosCabos01", "MaterialChapa", 
+                     "MaterialIsolFio01Enrol01", "MotorCompleto", "PolaridadeChapa", "PotenciaCompletaCv01", 
+                     "TipoLigacaoProtecaoTermica", "PassoEnrolamento01", "TipoDeImpregnacao"]
+
+    df = apply_ordinal_encoding(df, columns_to_encode)
     #df = replace_single_occurrences(df)
 
     return df
