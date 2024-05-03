@@ -1,4 +1,7 @@
+set -e
+
 docker build -t local .
 docker run -it --rm \
   -v ./:/git-repos \
-  local 
+  --network=host \
+  local

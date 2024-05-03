@@ -13,7 +13,7 @@ class DBConnection:
         self.use_mysql = use_mysql
         self.user = 'user1'
         self.passwd = 'bE97XnZzmF'
-        self.host = "lced-data.fe.up.pt"
+        self.host = "10.227.243.130"
         self.database = "weg_a"
         if not use_mysql:
             self.url = f'mysql://{self.user}:{self.passwd}@{self.host}:3306/{self.database}'
@@ -44,8 +44,11 @@ class DBConnection:
     def get_dataframe_cleaned(self):
         raise NotImplementedError
         from new_analysis import df_changed
-        df = df_changed(self.get_dataframe())
-        return df
+        return df_changed(self.get_dataframe_with_extracted_features())
+
+    def _get_dataframe_cleaned(self):
+        from new_analysis import df_changed
+        return df_changed(self.get_dataframe_with_extracted_features())
 
     def get_dataframe_with_extracted_features(self):
         try:
