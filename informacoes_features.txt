@@ -1,0 +1,46 @@
+APAGAR:
+	Cod_do_Material - done
+	NIVEL_REND_EFICIENCIA_-_EFF (sempre o mesmo) - done
+	COD_MATERIAL_FIO_01_ENROL_01 (Tem outra com uma descrição do material, por isso apagar esta) - done OU APAGAR ANTES DESIGNAÇAO
+	NUMERO_DESENHO (apagar, codigo de desenho num sistema qq) - done 
+	COD_DESENHO_DISCO_ESTATOR (apagar, codigo de desenho num sistema qq) - done   NAO DESCARTAR
+	COD_DESENHO_DISCO_ROTOR (apagar, codigo de desenho num sistema qq) - done	NAO DESCARTAR
+	CODIGO_DESENHO_ESTATOR_COMPLET (apagar, codigo de desenho num sistema qq) - done	NAO DESCARTAR
+	NUMERO_DE_FASES (sempre o mesmo) - done
+	PROCESSO_FABRICACAO (sempre o mesmo) - done
+
+Apenas 716 Null values depois disto
+
+Binárias:
+	CABOS_LIGACAO_EM_PARALELO (esta é binária)
+	CABOS_PROTECAO_TERMICA (esta é boleana)
+	CHOQUE_TERMICO (esta é boleana)
+	CLASSE_ISOLAMENTO (esta é binária)
+	TERMINAL_LIGACAO (esta é boleana)
+	TIPO ESTATOR BOBINADO (É BINÁRIA)
+	TIPO_LIGACAO_PROTECAO_TERMICA(É BINÁRIA)
+	USO_DO_TERMINAL (É BINÁRIA) (boleana)
+
+	boolean
+	em codigos agrupar num grupo outros todos os que têm menos de 1
+
+	NUMERO_ENROLAMENTOS_MOTOR(É BINÁRIA MAS JÁ ESTÁ COM NUMEROS, NÃO MEXER)
+
+
+
+Talvez apagar?
+	MOTOR_COMPLETO (apagar? nem está no dicionário) - nao apagar mas nao incluir no primeiro modelo
+	ID_ESTATOR_INSERTADO (é u ID mas não sei se será util)
+	DATA CRIAÇAO? SÓ SERVE PARA DADOS EXTERNOS (CUSTO DÁ UPDATE AUTOMATICAMENTE, PODEMOS ELIMINAR NÃO?)
+
+
+
+
+TIPO ALUMINIO(está no dicionário, deixou de existir?)
+TIPO_DE_IMPREGNACAO (4 tipos, mas 2 deles só acontecem 1 vez)
+
+
+sklearn.impute.SimpleImputer pode ser usada para completar null values
+
+
+DROP USO TERMINAL OU TERMINAL_LIGACAO E ELIMINAR LINHA
