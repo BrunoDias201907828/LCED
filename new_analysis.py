@@ -1,8 +1,5 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-import numpy as np
-import re
-from db_connection import DBConnection
 
 
 def get_duplicate_rows(df):
@@ -114,22 +111,4 @@ def df_changed(df):
 def select_columns(df, column_names):
     return df[column_names]
 
-
-if __name__ == '__main__':
-
-    db = DBConnection()
-    df = db.get_dataframe_with_extracted_features()
-    
-    #selected_columns_df = select_columns(df, ['Descricao', 'CabosProtecaoTermica', 'TipoLigacaoProtecaoTermica'])
-    #na_rows_df = selected_columns_df[selected_columns_df['CabosProtecaoTermica'].isna() | selected_columns_df['TipoLigacaoProtecaoTermica'].isna()]
-
-    df_change = df_changed(df)
-
-    # ChoqueTermico DiametroAnelCurto [mm] DiametroUsinadoRotor [mm] LarguraAnelCurto [mm] NrTotalFiosEnrol TipoDeImpregnacao
-
-    #df_change = df_change.drop(columns=['TipoLigacaoProtecaoTermica', 'CabosProtecaoTermica'])
-
-    #Fazer imputaçao a 'BitolaCaboAterramentoCarcaca [mm2]' e a 'DiametroExternoEstator [mm]'
-
-    from IPython import embed; embed()
     

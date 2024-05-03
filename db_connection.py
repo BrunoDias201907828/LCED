@@ -1,3 +1,4 @@
+from new_analysis import df_changed as clean_dataframe
 from external_data import FeatureExtractor
 from sqlalchemy import create_engine
 try:
@@ -24,7 +25,7 @@ class DBConnection:
             return mysql.connector.connect(user=self.user, password=self.passwd, host=self.host, database=self.database)
         return self.engine.connect()
 
-    def get_dataframe(self):
+    def _get_dataframe_raw(self):
         conn = self.get_connection()
         if self.use_mysql:
             df = pd.read_sql('SELECT * FROM DatasetWithCost', conn)
@@ -41,20 +42,11 @@ class DBConnection:
         df[bool_columns] = df[bool_columns].astype("boolean")
         return df
 
-    def get_dataframe_cleaned(self):
-        raise NotImplementedError
-        from new_analysis import df_changed
-        return df_changed(self.get_dataframe_with_extracted_features())
-
     def _get_dataframe_cleaned(self):
-        from new_analysis import df_changed
-        return df_changed(self.get_dataframe_with_extracted_features())
+        return clean_dataframe(self._get_dataframe_raw())
 
-    def get_dataframe_with_extracted_features(self):
-        try:
-            df = self.get_dataframe_cleaned()
-        except NotImplementedError:
-            df = self.get_dataframe()
+    def get_dataframe(self):
+        df = self._get_dataframe_cleaned()
         extractor = FeatureExtractor()
         df_ext = extractor.extract_features()
         return (
@@ -66,7 +58,5 @@ class DBConnection:
 if __name__ == "__main__":
     db = DBConnection()
     df = db.get_dataframe()
-    df_clean = db.get_dataframe_cleaned()
-    #df = db.get_dataframe_with_extracted_features()
 
     from IPython import embed; embed()
