@@ -21,11 +21,11 @@ if [ -z "$username" ]; then
   exit 1
 fi
 
-rsync -av -e ssh ./ "lced1@10.227.243.131:/home/lced1/code/user/${username}" \
+rsync -av -e --no-perms ssh ./ "lced1@10.227.243.131:/home/lced1/code/user/${username}" \
   --exclude='venv/' \
   --exclude='.git' \
   --exclude='__pycache__' \
   --exclude='.idea' \
   --exclude='*.pdf' \
   --exclude='*.csv'
-ssh -tt -L 8888:localhost:8888 lced1@10.227.243.131 "cd ~/code/user/${username}; ./docker-run.sh '$*'; exec bash;"
+ssh -tt -L 8888:localhost:8888 lced1@10.227.243.131 "cd ~/code/user/${username}; chmod -R 777 . ; ./docker-run.sh '$*'; exec bash;"
