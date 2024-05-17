@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
+import numpy as np
 
 
 def get_duplicate_rows(df):
@@ -87,9 +88,26 @@ def termica_solved(df):
     return df
 
 def apply_ordinal_encoding(df, columns):
-    encoder = OrdinalEncoder()
+    #df.fillna("np.nan", inplace=True)
+    encoder = OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-999)
     df[columns] = encoder.fit_transform(df[columns])
     return df
+
+#def apply_ordinal_encoding_for_imputation(df, columns):
+    encoder = OrdinalEncoder()
+
+    # Temporary placeholder for NA
+    df[columns] = df[columns].fillna('TEMP')  
+
+    df[columns] = encoder.fit_transform(df[columns])
+
+    # Replace encoded 'TEMP' back to -9999
+    df[columns] = df[columns].replace(encoder.categories_[0][0], -9999)
+
+    # Change to float type
+    df[columns] = df[columns].astype('float64')  
+    return df
+
 
 def drop_na_rows_inplace(df):
     df.dropna(inplace=True)
@@ -104,7 +122,7 @@ def df_changed(df):
     df = convert_cols_to_boolean(df)
     df = termica_solved(df)
     
-    drop_na_rows_inplace(df)
+    #drop_na_rows_inplace(df)
 
     columns_to_encode = ["Descricao", "DescricaoComponente", "CabosProtecaoTermica", "CarcacaPlataformaEletricaRaw", 
                      "CarcacaPlataformaEletricaComprimento", "CodigoDesenhoEstatorCompleto", "CodigoDesenhoDiscoEstator", 
@@ -113,6 +131,8 @@ def df_changed(df):
                      "TipoLigacaoProtecaoTermica", "PassoEnrolamento01", "TipoDeImpregnacao"]
 
     df = apply_ordinal_encoding(df, columns_to_encode)
+    #df = apply_ordinal_encoding_for_imputation(df, columns_to_encode)
+
     #df = replace_single_occurrences(df)
 
     return df
