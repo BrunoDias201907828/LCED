@@ -143,11 +143,13 @@ def print_unique_values_with_counts(df, column_name):
 def df_changed(df):
     df = remove_duplicated_rows(df)
     df = drop_columns(df)    
-    df = df.drop([2478,3882,1542,8454,3175,3921]) #[2478,3882] -> missing; [1542, 8454] -> 'TipoDeImpregnacao'; [3175, 3921] -> 'MaterialIsolFio01Enrol01'
+    df = df.drop([2478,3882]) 
+    df = df.loc[df['MaterialIsolFio01Enrol01'] != 'COBRE WG6GR3']
+    df = df.loc[~df['TipoDeImpregnacao'].isin(['VERNIZ F', 'GOTEJAMENTO + VPI'])]
     df = convert_cols_to_int(df)
     df = convert_cols_to_boolean(df)
     df = termica_solved(df)
-    df = replace_single_occurrences(df)
+    #df = replace_single_occurrences(df)
 
     return df
 

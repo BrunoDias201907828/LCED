@@ -1,6 +1,7 @@
 from data_processing import df_changed as clean_dataframe
 from external_data import FeatureExtractor
 from sqlalchemy import create_engine
+import data_processing as dp
 try:
     import mysql.connector
     MYSQLCONNECTOR = True
