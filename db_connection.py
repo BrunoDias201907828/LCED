@@ -1,4 +1,4 @@
-from new_analysis import df_changed as clean_dataframe
+from data_processing import df_changed as clean_dataframe
 from external_data import FeatureExtractor
 from sqlalchemy import create_engine
 try:
