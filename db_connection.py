@@ -14,8 +14,8 @@ class DBConnection:
         self.use_mysql = use_mysql
         self.user = 'user1'
         self.passwd = 'bE97XnZzmF'
-        self.host = "10.227.243.130"
-        self.database = "weg_a"
+        self.host = "10.227.243.131"
+        self.database = "local_db"
         if not use_mysql:
             self.url = f'mysql://{self.user}:{self.passwd}@{self.host}:3306/{self.database}'
             self.engine = create_engine(self.url, pool_pre_ping=True)

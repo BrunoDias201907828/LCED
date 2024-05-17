@@ -19,7 +19,6 @@ def build_iterative_imputers(estimators):
 
 
 def build_imputers():
-    imputers = build_simple_imputers(strategies=["mean", "median"])
     iterative_imputers = build_iterative_imputers(estimators=[BayesianRidge, RandomForestRegressor])
     imputers.update(iterative_imputers)
     return imputers

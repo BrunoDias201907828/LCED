@@ -43,7 +43,7 @@ def print_value_counts(df):
         print("\n")
 
 def drop_columns(df):
-    columns_to_remove = ['NumeroDeFases', 'ProcessoFabricacao', 'NivelRendEficiencia', 'CodigoMaterial', 'CodigoMaterialFio01Enrol01', 'NumeroDesenho', 'TerminalLigacao', 'IdEstatortInsertado']
+    columns_to_remove = ['NumeroDeFases', 'ProcessoFabricacao', 'NivelRendEficiencia', 'CodigoMaterial', 'CodigoMaterialFio01Enrol01', 'NumeroDesenho', 'TerminalLigacao', 'IdEstatortInsertado', 'Descricao', 'MotorCompleto']
     df = df.drop(columns_to_remove, axis=1)
     return df
 
@@ -87,57 +87,53 @@ def termica_solved(df):
     df['CabosProtecaoTermica'] = df['CabosProtecaoTermica'].astype('string').fillna('Nao Aplicavel')
     return df
 
-def apply_ordinal_encoding(df, columns):
-    #df.fillna("np.nan", inplace=True)
-    encoder = OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-999)
-    df[columns] = encoder.fit_transform(df[columns])
+def apply_ordinal_encoding(df):
+    columns = ["DescricaoComponente", "CabosProtecaoTermica", "CarcacaPlataformaEletricaRaw", 
+                     "CarcacaPlataformaEletricaComprimento", "CodigoDesenhoEstatorCompleto", "CodigoDesenhoDiscoEstator", 
+                     "CodigoDesenhoDiscoRotor", "EsquemaBobinagem", "GrupoCarcaca", "LigacaoDosCabos01", "MaterialChapa", 
+                     "MaterialIsolFio01Enrol01", "PolaridadeChapa", "PotenciaCompletaCv01", 
+                     "TipoLigacaoProtecaoTermica", "PassoEnrolamento01", "TipoDeImpregnacao"]
+    encoder = OrdinalEncoder(min_frequency=10)
+    for col in columns:
+        missing_mask = df[col].isna()
+        df[col] = df[col].astype(str)         
+        df[col] = encoder.fit_transform(df[[col]])  
+        df.loc[missing_mask, col] = np.nan 
+
     return df
 
-#def apply_ordinal_encoding_for_imputation(df, columns):
-    encoder = OrdinalEncoder()
+def get_distinct_values(df):
+    columns = ["DescricaoComponente", "CabosProtecaoTermica", "CarcacaPlataformaEletricaRaw", 
+                     "CarcacaPlataformaEletricaComprimento", "CodigoDesenhoEstatorCompleto", "CodigoDesenhoDiscoEstator", 
+                     "CodigoDesenhoDiscoRotor", "EsquemaBobinagem", "GrupoCarcaca", "LigacaoDosCabos01", "MaterialChapa", 
+                     "MaterialIsolFio01Enrol01", "PolaridadeChapa", "PotenciaCompletaCv01", 
+                     "TipoLigacaoProtecaoTermica", "PassoEnrolamento01", "TipoDeImpregnacao"]    
+    distinct_values = df[columns].nunique()
+    return distinct_values
 
-    # Temporary placeholder for NA
-    df[columns] = df[columns].fillna('TEMP')  
-
-    df[columns] = encoder.fit_transform(df[columns])
-
-    # Replace encoded 'TEMP' back to -9999
-    df[columns] = df[columns].replace(encoder.categories_[0][0], -9999)
-
-    # Change to float type
-    df[columns] = df[columns].astype('float64')  
-    return df
-
+def get_missing_values_info(df):
+    missing_values = df.isna().sum()
+    missing_values = missing_values[missing_values > 0]  # Filter columns with missing values
+    missing_values_info = pd.DataFrame({
+        'column_type': df[missing_values.index].dtypes,
+        'missing_values': missing_values
+    })
+    return missing_values_info
 
 def drop_na_rows_inplace(df):
     df.dropna(inplace=True)
 
 def df_changed(df):
-
-
     df = remove_duplicated_rows(df)
     df = drop_columns(df)    
     df = df.drop([2478,3882])
     df = convert_cols_to_int(df)
-    df = convert_cols_to_boolean(df)
+    #df = convert_cols_to_boolean(df)
     df = termica_solved(df)
-    
-    #drop_na_rows_inplace(df)
-
-    columns_to_encode = ["Descricao", "DescricaoComponente", "CabosProtecaoTermica", "CarcacaPlataformaEletricaRaw", 
-                     "CarcacaPlataformaEletricaComprimento", "CodigoDesenhoEstatorCompleto", "CodigoDesenhoDiscoEstator", 
-                     "CodigoDesenhoDiscoRotor", "EsquemaBobinagem", "GrupoCarcaca", "LigacaoDosCabos01", "MaterialChapa", 
-                     "MaterialIsolFio01Enrol01", "MotorCompleto", "PolaridadeChapa", "PotenciaCompletaCv01", 
-                     "TipoLigacaoProtecaoTermica", "PassoEnrolamento01", "TipoDeImpregnacao"]
-
-    df = apply_ordinal_encoding(df, columns_to_encode)
-    #df = apply_ordinal_encoding_for_imputation(df, columns_to_encode)
-
+    print(df.dtypes)
+    df = apply_ordinal_encoding(df)
+    #print(get_missing_values_info(df))
     #df = replace_single_occurrences(df)
 
     return df
-
-def select_columns(df, column_names):
-    return df[column_names]
-
     
