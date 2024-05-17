@@ -44,7 +44,9 @@ if __name__ == "__main__":
         mlflow.log_param("seed", seed)
 
         db_connection = DBConnection()
-        df = db_connection._get_dataframe_cleaned()  # TODO: Change This Nuno
+        df = db_connection.get_dataframe()  # TODO: Change This Nuno
+        from IPython import embed
+        embed()
         df = IMPUTATION_MAPPER[args.imputation](df)  # TODO: Wait for Bruno
         # TODO: Encoding
         y = df["CustoIndustrial"].to_numpy()

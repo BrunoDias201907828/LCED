@@ -149,7 +149,7 @@ def df_changed(df):
     df = convert_cols_to_int(df)
     df = convert_cols_to_boolean(df)
     df = termica_solved(df)
-    #df = replace_single_occurrences(df)
+    df = replace_single_occurrences(df)
 
     return df
 

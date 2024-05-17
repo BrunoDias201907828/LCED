@@ -9,3 +9,4 @@ yfinance
 mysqlclient
 ipython
 xgboost
+seaborn
