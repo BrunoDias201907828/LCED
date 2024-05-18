@@ -18,6 +18,7 @@ CATEGORICAL_COLUMNS = [
     "PassoEnrolamento01",
     "CabosProtecaoTermica",
     "CarcacaPlataformaEletricaRaw",
+    "CarcacaPlataformaEletricaComprimento",
 ]
 
 
