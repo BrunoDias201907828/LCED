@@ -10,3 +10,4 @@ mysqlclient
 ipython
 xgboost
 seaborn
+category_encoders

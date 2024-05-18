@@ -32,8 +32,9 @@ def target_encoding(df):
     df_transformed[CATEGORICAL_COLUMNS] = x_transformed
     return df_transformed
 
+
 def binary_encoding(df):
-    encoder = ce.BinaryEncoder(cols=CATEGORICAL_COLUMNS,return_df=True)
+    encoder = ce.BinaryEncoder(cols=CATEGORICAL_COLUMNS, return_df=True)
 
     df_encoded = encoder.fit_transform(df)
     return df_encoded

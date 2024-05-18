@@ -1,4 +1,5 @@
 from db_connection import DBConnection
+from encoding import target_encoding, binary_encoding
 
 from xgboost import XGBRegressor
 from sklearn.pipeline import make_pipeline
@@ -25,6 +26,11 @@ IMPUTATION_MAPPER = {  # TODO
     "NoImputation": None
 }
 
+ENCODING_MAPPER = {  # TODO
+    "OneHotEncoding": binary_encoding,
+    "TargetEncoding": target_encoding
+}
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model"     , choices=MODEL_MAPPER.keys()                 , type=str, help="Model to use"            )
@@ -44,11 +50,11 @@ if __name__ == "__main__":
         mlflow.log_param("seed", seed)
 
         db_connection = DBConnection()
-        df = db_connection.get_dataframe()  # TODO: Change This Nuno
+        df = db_connection.get_dataframe()
         from IPython import embed
         embed()
         df = IMPUTATION_MAPPER[args.imputation](df)  # TODO: Wait for Bruno
-        # TODO: Encoding
+        df = ENCODING_MAPPER[args.encoding](df)
         y = df["CustoIndustrial"].to_numpy()
         x = df.drop("CustoIndustrial", axis=1).to_numpy()
 
