@@ -23,10 +23,10 @@ MODEL_MAPPER = {
 IMPUTATION_MAPPER = {  # TODO
     "BayesianRidge": None,
     "RandomForest": None,
-    "NoImputation": None
+    "NoImputation": lambda _df: _df.dropna()
 }
 
-ENCODING_MAPPER = {  # TODO
+ENCODING_MAPPER = {
     "OneHotEncoding": binary_encoding,
     "TargetEncoding": target_encoding
 }
@@ -41,6 +41,8 @@ if __name__ == "__main__":
     parser.add_argument("--run_name"                                                , type=str, help="Name of the run"         )
     parser.add_argument("--experiment_name"                                         , type=str, help="Name of the experiment"  )
     args = parser.parse_args()
+    # example:
+    # python modeling/train_script.py --model random_forest --imputation NoImputation --encoding TargetEncoding --params '{"n_estimators": [10, 100, 1000], "max_depth": [3, 5, 10]}' --run_name random_forest --experiment_name default
 
     mlflow.set_tracking_uri("http://localhost:5000")
     mlflow.set_experiment(experiment_name=args.experiment_name)
@@ -51,12 +53,13 @@ if __name__ == "__main__":
 
         db_connection = DBConnection()
         df = db_connection.get_dataframe()
-        from IPython import embed
-        embed()
         df = IMPUTATION_MAPPER[args.imputation](df)  # TODO: Wait for Bruno
         df = ENCODING_MAPPER[args.encoding](df)
-        y = df["CustoIndustrial"].to_numpy()
-        x = df.drop("CustoIndustrial", axis=1).to_numpy()
+        y = df["CustoIndustrial"].to_numpy(dtype=float)
+        x = df.drop("CustoIndustrial", axis=1).to_numpy(dtype=float)
+
+        from IPython import embed
+        embed()
 
         scaler = StandardScaler()
         model = MODEL_MAPPER[args.model](random_state=seed)
