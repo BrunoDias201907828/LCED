@@ -13,7 +13,7 @@ missing_col = ['BitolaCaboAterramentoCarcaca [mm2]','ChoqueTermico','DiametroAne
 def impute_with_random_forest(df):
     df = target_encoding(df)
     df_changed = df.copy()
-    imputer = IterativeImputer(estimator=RandomForestRegressor())
+    imputer = IterativeImputer(estimator=RandomForestRegressor(), max_iter=1)
     complete_data = imputer.fit_transform(df_changed[df.columns].to_numpy(dtype='float64'))
     complete_data_df = pd.DataFrame(complete_data, columns=df.columns)
     return complete_data_df
@@ -26,11 +26,11 @@ def impute_with_bayesian_ridge(df):
     complete_data_df = pd.DataFrame(complete_data, columns=df.columns)
     return complete_data_df
 
-
 if __name__ == "__main__":
     db_connection = DBConnection()
     df = db_connection.get_dataframe()
-    df = impute_with_random_forest(df)
     print(df.isna().sum().sum())
-    #df = impute_with_bayesian_ridge(df, df.columns)
+    df = impute_with_random_forest(df)
+    # df = impute_with_bayesian_ridge(df)
+    print(df.isna().sum().sum())
     #from IPython import embed; embed()
