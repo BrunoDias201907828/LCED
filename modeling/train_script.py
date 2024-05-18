@@ -1,5 +1,6 @@
 from db_connection import DBConnection
 from encoding import target_encoding, binary_encoding
+from data_imputation import impute_with_random_forest  # , impute_with_bayesian_ridge
 
 from xgboost import XGBRegressor
 from sklearn.pipeline import make_pipeline
