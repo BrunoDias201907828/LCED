@@ -5,66 +5,68 @@ from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 from sklearn.preprocessing import OrdinalEncoder
 import numpy as np
-
-string_columns = ["DescricaoComponente", "CabosProtecaoTermica", "CarcacaPlataformaEletricaRaw", 
-    "CarcacaPlataformaEletricaComprimento", "CodigoDesenhoEstatorCompleto", "CodigoDesenhoDiscoEstator", 
-    "CodigoDesenhoDiscoRotor", "EsquemaBobinagem", "GrupoCarcaca", "LigacaoDosCabos01", "MaterialChapa", 
-    "MaterialIsolFio01Enrol01", "PolaridadeChapa", "PotenciaCompletaCv01", 
-    "TipoLigacaoProtecaoTermica", "PassoEnrolamento01", "TipoDeImpregnacao"]
+import pandas as pd
+from encoding import target_encoding
 
 
-def apply_ordinal_encoding(df):
-    encoder = OrdinalEncoder(min_frequency=10)
-    for col in string_columns:
-        missing_mask = df[col].isna()
-        df[col] = df[col].astype(str)         
-        df[col] = encoder.fit_transform(df[[col]])  
-        df.loc[missing_mask, col] = np.nan 
+missing_col = ['BitolaCaboAterramentoCarcaca [mm2]','ChoqueTermico','DiametroAnelCurto [mm]','DiametroExternoEstator [mm]','DiametroUsinadoRotor [mm]','LarguraAnelCurto [mm]','NrTotalFiosEnrol']
 
-    return df
+# def convert_to_int(df):
+#     columns = ['ChoqueTermico', 'ClassIsolamento', 'CabosLigacaoEmParalelo', 'NumeroEnrolamentoMotor', 'UsoDoTerminal', 'TipoEstatorBobinado', 'TipoDeImpregnacao']
+#     for col in columns:
+#         df[col] = df[col].astype('Int64')
+#     return df
 
-def impute_with_random_forest(df, columns):
+# def apply_ordinal_encoding(df):
+#     string_columns = ["DescricaoComponente", "CabosProtecaoTermica", "CarcacaPlataformaEletricaRaw", 
+#         "CarcacaPlataformaEletricaComprimento",
+#         "CodigoDesenhoDiscoRotor", "EsquemaBobinagem", "GrupoCarcaca", "LigacaoDosCabos01", "MaterialChapa", 
+#         "MaterialIsolFio01Enrol01", "PolaridadeChapa", 
+#         "TipoLigacaoProtecaoTermica", "PassoEnrolamento01"]
+#     encoder = OrdinalEncoder(min_frequency=10)
+#     for col in string_columns:
+#         missing_mask = df[col].isna()
+#         df[col] = df[col].astype(str)         
+#         df[col] = encoder.fit_transform(df[[col]])  
+#         df.loc[missing_mask, col] = np.nan
+#     return df
+
+# def get_missing_values_info(df):
+#     missing_values = df.isna().sum()
+#     missing_values = missing_values[missing_values > 0]
+#     missing_values_info = pd.DataFrame({
+#         'column_type': df[missing_values.index].dtypes,
+#         'missing_values': missing_values
+#     })
+#     return missing_values_info
+
+def impute_with_random_forest(df):
+    df_changed = df.copy()
+    # df_changed = apply_ordinal_encoding(df)
+    # df_changed = convert_to_int(df_changed)
+    df_changed = target_encoding(df_changed)
+
     from IPython import embed; embed()
     imputer = IterativeImputer(estimator=RandomForestRegressor())
-    df_changed = apply_ordinal_encoding(df)
-    complete_data = imputer.fit_transform(df_changed[columns].to_numpy())
-    embed()
-    df[string_columns] = complete_data[string_columns]
+    complete_data = imputer.fit_transform(df_changed[df.columns].to_numpy(dtype='float64'))
+    complete_data_df = pd.DataFrame(complete_data, columns=df.columns)
+    df[missing_col] = complete_data_df[missing_col]
     return df
 
-
-#ACRESCENTAR AQUI FUNCOES TODAS PARA INT
-
-
-def impute_with_random_forest(df, columns):
-    # Identify datetime columns
-    datetime_columns = df.select_dtypes(include=[np.datetime64]).columns
-    non_datetime_columns = [col for col in columns if col not in datetime_columns]
-    
-    # Impute datetime columns (choose a strategy)
-    for col in datetime_columns:
-        df[col].fillna(pd.Timestamp.min, inplace=True)  # Or your preferred method
-    
-    # Apply ordinal encoding on the rest of the data
-    df_changed = apply_ordinal_encoding(df)
-
-    # Impute with RandomForestRegressor using only non datetime columns
+def impute_with_bayesian_ridge(df):
+    df_changed = df.copy()
+    df_changed = target_encoding(df_changed)
     imputer = IterativeImputer(estimator=RandomForestRegressor())
-    complete_data = imputer.fit_transform(df_changed[non_datetime_columns].to_numpy())
-    df[non_datetime_columns] = complete_data 
-
-    return df
-
-#def impute_with_bayesian_ridge(df, columns):
-    imputer = IterativeImputer(estimator=BayesianRidge())
-    df[columns] = imputer.fit_transform(df[columns])
+    complete_data = imputer.fit_transform(df_changed[df.columns].to_numpy(dtype='float64'))
+    complete_data_df = pd.DataFrame(complete_data, columns=df.columns)
+    df[missing_col] = complete_data_df[missing_col]
     return df
 
 
 if __name__ == "__main__":
     db_connection = DBConnection()
     df = db_connection.get_dataframe()
-
-    df = impute_with_random_forest(df, df.columns)
+    #print(get_missing_values_info(df))
+    df = impute_with_random_forest(df)
     #df = impute_with_bayesian_ridge(df, df.columns)
     from IPython import embed; embed()
