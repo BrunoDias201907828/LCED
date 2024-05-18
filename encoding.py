@@ -12,7 +12,6 @@ CATEGORICAL_COLUMNS = [
     "LigacaoDosCabos01",
     "MaterialChapa",
     "MaterialIsolFio01Enrol01",
-    "PotenciaCompletaCv01",
     "PolaridadeChapa",
     "TipoLigacaoProtecaoTermica",
     "PassoEnrolamento01",
