@@ -1,5 +1,6 @@
 from db_connection import DBConnection
 from encoding import target_encoding, binary_encoding
+from data_imputation import impute_with_random_forest  # , impute_with_bayesian_ridge
 
 from xgboost import XGBRegressor
 from sklearn.pipeline import make_pipeline
@@ -53,13 +54,10 @@ if __name__ == "__main__":
 
         db_connection = DBConnection()
         df = db_connection.get_dataframe()
-        df = IMPUTATION_MAPPER[args.imputation](df)  # TODO: Wait for Bruno
         df = ENCODING_MAPPER[args.encoding](df)
+        df = IMPUTATION_MAPPER[args.imputation](df)  # TODO: Wait for Bruno
         y = df["CustoIndustrial"].to_numpy(dtype=float)
         x = df.drop("CustoIndustrial", axis=1).to_numpy(dtype=float)
-
-        from IPython import embed
-        embed()
 
         scaler = StandardScaler()
         model = MODEL_MAPPER[args.model](random_state=seed)
