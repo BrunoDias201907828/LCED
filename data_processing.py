@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-
 def get_duplicate_rows(df):
     duplicate_rows = df.duplicated(subset='CodigoMaterial', keep=False)
     df = df[duplicate_rows]
@@ -75,24 +74,9 @@ def convert_cols_to_boolean(df):
     return df
 
 def termica_solved(df):
-    #df['CabosProtecaoTermica']=df['CabosProtecaoTermica'].astype(str)
     df['TipoLigacaoProtecaoTermica'] = df['TipoLigacaoProtecaoTermica'].fillna('Nao Aplicavel')
     df['CabosProtecaoTermica'] = df['CabosProtecaoTermica'].astype('string').fillna('Nao Aplicavel')
     return df
-
-def missing_values_heatmap(df): #only for columns and rows where there are missing values, not whole df
-    missing_rows = df[df.isnull().any(axis=1)]
-    missing_cols = missing_rows.loc[:, missing_rows.isnull().any()]
-
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(missing_cols.isnull(), cmap='viridis', cbar=False)
-    plt.title('Missing Values Heatmap')
-    plt.xlabel('Columns')
-    plt.ylabel('Rows')
-    plt.show()
-
-def select_columns(df, column_names):
-    return df[column_names]
 
 def replace_single_occurrences(df):
     columns = ['CodigoComponente', 'DescricaoComponente', 'CarcacaPlataformaEletricaRaw', 'CarcacaPlataformaEletricaComprimento', 'CodigoDesenhoEstatorCompleto', 'CodigoDesenhoDiscoEstator', 'CodigoDesenhoDiscoRotor', 'EsquemaBobinagem', 'GrupoCarcaca', 'LigacaoDosCabos01', 'PolaridadeChapa', 'PassoEnrolamento01', 'TipoDeImpregnacao']
@@ -112,9 +96,6 @@ def replace_single_occurrences(df):
     
     return df
 
-def get_row_indices_by_value(df, column_name, value):
-    return df.index[df[column_name] == value].tolist()
-
 def get_distinct_values(df):
     columns = ["DescricaoComponente", "CabosProtecaoTermica", "CarcacaPlataformaEletricaRaw", 
                      "CarcacaPlataformaEletricaComprimento", "CodigoDesenhoEstatorCompleto", "CodigoDesenhoDiscoEstator", 
@@ -126,24 +107,15 @@ def get_distinct_values(df):
 
 
 def print_unique_values_with_counts(df, column_name):
-    """
-    Prints every unique value and its count from a specified column in the DataFrame.
-
-    Parameters:
-    df (pd.DataFrame): The DataFrame to check.
-    column_name (str): The name of the column to check.
-    """
     value_counts = df[column_name].value_counts()
     print(f"Unique values and their counts in column '{column_name}':")
     for value, count in value_counts.items():
         print(f"{value}: {count}")
 
-
-
 def df_changed(df):
     df = remove_duplicated_rows(df)
     df = drop_columns(df)    
-    df = df.drop([2478,3882]) 
+    df = df.drop([2478,3882,2641])
     df = df.loc[df['MaterialIsolFio01Enrol01'] != 'COBRE WG6GR3']
     df = df.loc[~df['TipoDeImpregnacao'].isin(['VERNIZ F', 'GOTEJAMENTO + VPI'])]
     df = convert_cols_to_int(df)
