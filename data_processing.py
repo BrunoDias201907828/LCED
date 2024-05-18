@@ -57,7 +57,8 @@ def replace_values(df, column, val1, val2):
 def convert_cols_to_int(df):
     df = replace_strings(df, 'TipoEstatorBobinado', 'DE LINHA ESPECIAL', 'DE TABELA DE VALORES')
     df = replace_strings(df, 'ClassIsolamento', 'F', 'H')
-    df = replace_values(df, 'NumeroEnrolamentoMotor', 1, 2) 
+    df = replace_values(df, 'NumeroEnrolamentoMotor', 1, 2)
+    df = replace_values(df, 'TipoDeImpregnacao', 'RESINA POLIESTER LACTHERM', 'RESINA DE SILICONE')
     df['CodigoDesenhoEstatorCompleto'] = df['CodigoDesenhoEstatorCompleto'].astype(int)
     df['CodigoDesenhoDiscoEstator'] = df['CodigoDesenhoDiscoEstator'].astype(int)
     return df
@@ -68,6 +69,7 @@ def convert_to_boolean(df, column):
 
 def convert_cols_to_boolean(df):
     df = convert_to_boolean(df, 'TipoEstatorBobinado')
+    df = convert_to_boolean(df, 'TipoDeImpregnacao')
     df = convert_to_boolean(df, 'ClassIsolamento')
     df = convert_to_boolean(df, 'CabosLigacaoEmParalelo')
     df = convert_to_boolean(df, 'NumeroEnrolamentoMotor')
