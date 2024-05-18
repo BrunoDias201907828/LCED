@@ -112,6 +112,17 @@ def print_unique_values_with_counts(df, column_name):
     for value, count in value_counts.items():
         print(f"{value}: {count}")
 
+def calculate_average_power(value):
+    if '/' in value:
+        parts = value.split('/')
+        average_power = sum(float(part) for part in parts) / len(parts)
+        if average_power.is_integer():
+            return int(average_power)
+        else:
+            return average_power
+    else:
+        return int(value) if value.isdigit() else float(value)
+
 def df_changed(df):
     df = remove_duplicated_rows(df)
     df = drop_columns(df)    
@@ -122,6 +133,7 @@ def df_changed(df):
     df = convert_cols_to_boolean(df)
     df = termica_solved(df)
     df = replace_single_occurrences(df)
+    df['PotenciaCompletaCv01'] = df['PotenciaCompletaCv01'].apply(lambda x: calculate_average_power(x))
 
     return df
 
