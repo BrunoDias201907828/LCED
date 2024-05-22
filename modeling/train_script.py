@@ -1,11 +1,12 @@
 from db_connection import DBConnection
 from encoding import target_encoding, binary_encoding
-from data_imputation import impute_with_random_forest  # , impute_with_bayesian_ridge
 
+from sklearn.experimental import enable_halving_search_cv, enable_iterative_imputer
+from sklearn.impute import IterativeImputer
 from xgboost import XGBRegressor
-from sklearn.pipeline import make_pipeline
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import BayesianRidge
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.experimental import enable_halving_search_cv
 from sklearn.model_selection import HalvingGridSearchCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVR
@@ -14,29 +15,29 @@ import argparse
 import pandas as pd
 import mlflow
 import json
-
+import os
+TOLERANCE = 0.05
 MODEL_MAPPER = {
     "random_forest": RandomForestRegressor,
     "xgboost": XGBRegressor,
     "svm": SVR
 }
-
-IMPUTATION_MAPPER = {  # TODO
-    "BayesianRidge": None,
-    "RandomForest": None,
+IMPUTATION_MAPPER = {
+    "BayesianRidge": IterativeImputer(estimator=BayesianRidge(), tol=TOLERANCE),
+    "RandomForest": IterativeImputer(estimator=RandomForestRegressor(), tol=TOLERANCE),
     "NoImputation": lambda _df: _df.dropna()
 }
-
 ENCODING_MAPPER = {
-    "OneHotEncoding": binary_encoding,
+    "BinaryEncoding": binary_encoding,
     "TargetEncoding": target_encoding
 }
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model"     , choices=MODEL_MAPPER.keys()                 , type=str, help="Model to use"            )
     parser.add_argument("--imputation", choices=IMPUTATION_MAPPER.keys()            , type=str, help="Imputation method to use")
-    parser.add_argument("--encoding"  , choices=("OneHotEncoding", "TargetEncoding"), type=str, help="Encoding method to use"  )
+    parser.add_argument("--encoding"  , choices=("BinaryEncoding", "TargetEncoding"), type=str, help="Encoding method to use"  )
     parser.add_argument("--params"                                                  , type=json.loads,
                         help=""" Parameters for the model. E.g, '{"learning_rate": [0.01, 0.1], "n_estimators": [50, 100]}' """             )
     parser.add_argument("--run_name"                                                , type=str, help="Name of the run"         )
@@ -49,25 +50,36 @@ if __name__ == "__main__":
     mlflow.set_experiment(experiment_name=args.experiment_name)
 
     with mlflow.start_run(run_name=args.run_name):
-        seed = hash(args.run_name + args.experiment_name)
+        # seed = hash(args.run_name + args.experiment_name)
+        seed = 265894
+        steps = []
         mlflow.log_param("seed", seed)
 
         db_connection = DBConnection()
         df = db_connection.get_dataframe()
         df = ENCODING_MAPPER[args.encoding](df)
-        df = IMPUTATION_MAPPER[args.imputation](df)  # TODO: Wait for Bruno
+        imputer = IMPUTATION_MAPPER[args.imputation]
+        if not isinstance(imputer, IterativeImputer):
+            df = imputer(df)
+        else:
+            steps.append(("imputer", imputer))
         y = df["CustoIndustrial"].to_numpy(dtype=float)
         x = df.drop("CustoIndustrial", axis=1).to_numpy(dtype=float)
 
         scaler = StandardScaler()
         model = MODEL_MAPPER[args.model](random_state=seed)
-        pipeline = make_pipeline(scaler, model)
+        steps.extend([("scaler", scaler), ("model", model)])
+        pipeline = Pipeline(steps=steps)
         search = HalvingGridSearchCV(
             estimator=pipeline,
-            scoring=root_mean_squared_error,
-            param_grid=args.params
+            scoring='neg_root_mean_squared_error',
+            param_grid={"model__" + key: value for key, value in args.params.items()},
+            n_jobs=-1,
+            verbose=2
         )
         results = search.fit(x, y)
+
+        from IPython import embed; embed()
 
         mlflow.log_params(search.best_params_)
         mlflow.log_metric("rmse", search.best_score_)
