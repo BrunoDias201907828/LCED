@@ -8,23 +8,23 @@ import pandas as pd
 from encoding import target_encoding
 
 
+TOLERANCE = 0.05
 missing_col = ['BitolaCaboAterramentoCarcaca [mm2]','ChoqueTermico','DiametroAnelCurto [mm]','DiametroExternoEstator [mm]','DiametroUsinadoRotor [mm]','LarguraAnelCurto [mm]','NrTotalFiosEnrol']
 
+
 def impute_with_random_forest(df):
-    df = target_encoding(df)
-    df_changed = df.copy()
-    imputer = IterativeImputer(estimator=RandomForestRegressor(), max_iter=1)
-    complete_data = imputer.fit_transform(df_changed[df.columns].to_numpy(dtype='float64'))
+    imputer = IterativeImputer(estimator=RandomForestRegressor(), tol=TOLERANCE)
+    complete_data = imputer.fit_transform(df.to_numpy(dtype='float64'))
     complete_data_df = pd.DataFrame(complete_data, columns=df.columns)
     return complete_data_df
 
+
 def impute_with_bayesian_ridge(df):
-    df = target_encoding(df)
-    df_changed = df.copy()
-    imputer = IterativeImputer(estimator=BayesianRidge())
-    complete_data = imputer.fit_transform(df_changed[df.columns].to_numpy(dtype='float64'))
+    imputer = IterativeImputer(estimator=BayesianRidge(), tol=TOLERANCE)
+    complete_data = imputer.fit_transform(df.to_numpy(dtype='float64'))
     complete_data_df = pd.DataFrame(complete_data, columns=df.columns)
     return complete_data_df
+
 
 if __name__ == "__main__":
     db_connection = DBConnection()
