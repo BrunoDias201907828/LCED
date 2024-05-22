@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+import numpy as np
 
 def get_duplicate_rows(df):
     duplicate_rows = df.duplicated(subset='CodigoMaterial', keep=False)
@@ -136,6 +137,9 @@ def df_changed(df):
     df = termica_solved(df)
     df = replace_single_occurrences(df)
     df['PotenciaCompletaCv01'] = df['PotenciaCompletaCv01'].apply(lambda x: calculate_average_power(x))
+    df['volume_estator'] = (np.pi/4)*((df['DiametroExternoEstator [mm]']**2)-(df['DiametroUsinadoRotor [mm]']**2))*df['ComprimentoTotalPacote [mm]']
+    df['volume_rotor'] = (np.pi/4)*((df['DiametroUsinadoRotor [mm]']**2)-(df['LarguraAnelCurto [mm]']**2))*df['ComprimentoTotalPacote [mm]']
+    df['volume_ratio'] = df['volume_rotor'] / df['volume_estator']
 
     return df
 
