@@ -76,10 +76,7 @@ if __name__ == "__main__":
             param_grid={"model__" + key: value for key, value in args.params.items()},
             n_jobs=-1,
             verbose=2
-        )
-        results = search.fit(x, y)
-
-        from IPython import embed; embed()
+        ).fit(x, y)
 
         mlflow.log_params(search.best_params_)
         mlflow.log_metric("rmse", search.best_score_)
@@ -88,7 +85,7 @@ if __name__ == "__main__":
         signature = mlflow.models.infer_signature(x, best_model.predict(x))
         mlflow.sklearn.log_model(best_model, "best_model", signature=signature)
 
-        cv_results_df = pd.DataFrame(results.cv_results_)
+        cv_results_df = pd.DataFrame(search.cv_results_)
         cv_results_df.to_csv('cv_results.csv', index=False)
         mlflow.log_artifact('cv_results.csv')
 
