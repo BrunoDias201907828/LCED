@@ -1,1 +1,1 @@
-{"kernel": ["linear", "poly", "rbf", "sigmoid", "precomputed"], "C": [1, 10, 100, 1000], "cache_size": [2000], "epsilon": [0.01, 0.1, 0.5]}
+{"kernel": ["linear", "poly", "rbf", "sigmoid", "precomputed"], "C": [1, 10, 100, 1000], "epsilon": [0.01, 0.1, 0.5]}

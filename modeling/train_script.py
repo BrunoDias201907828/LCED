@@ -67,7 +67,7 @@ if __name__ == "__main__":
         x = df.drop("CustoIndustrial", axis=1).to_numpy(dtype=float)
 
         scaler = StandardScaler()
-        model = MODEL_MAPPER[args.model](random_state=seed)
+        model = MODEL_MAPPER[args.model]()#random_state=seed
         steps.extend([("scaler", scaler), ("model", model)])
         pipeline = Pipeline(steps=steps)
         search = HalvingGridSearchCV(

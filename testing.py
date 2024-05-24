@@ -34,10 +34,11 @@ def run_script(script_path, model, imputation, encoding, params_file, run_name, 
 
 if __name__ == "__main__":
     script_path = "modeling/train_script.py"  
-    params_file = "params.json" 
+    params_file = "modeling/parameters_svr.json" 
 
-    run_script(script_path, "xgboost", "NoImputation", "TargetEncoding", params_file, "xg_t", "xg_t")
-    run_script(script_path, "xgboost", "BayesianRidge", "TargetEncoding", params_file, "xg_tb", "xg_tb")
-    run_script(script_path, "xgboost", "NoImputation", "BinaryEncoding", params_file, "xg_b", "xg_b")
-    run_script(script_path, "xgboost", "BayesianRidge", "BinaryEncoding", params_file, "xg_bb", "xg_bb")
+    run_script(script_path, "svm", "NoImputation", "TargetEncoding", params_file, "svm_t", "svm_t")
+    run_script(script_path, "svm", "BayesianRidge", "TargetEncoding", params_file, "svm_tb", "svm_tb")
+    run_script(script_path, "svm", "NoImputation", "BinaryEncoding", params_file, "svm_b", "svm_b")
+    run_script(script_path, "svm", "BayesianRidge", "BinaryEncoding", params_file, "svm_bb", "svm_bb")
 
+#python3 modeling/train_script.py --model svm --imputation NoImputation --encoding TargetEncoding --params '{"kernel": ["linear", "poly", "rbf", "sigmoid", "precomputed"], "C": [1, 10, 100, 1000], "epsilon": [0.01, 0.1, 0.5]}' --run_name svm_t --experiment_name svm_t &
