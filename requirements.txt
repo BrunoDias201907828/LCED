@@ -11,3 +11,4 @@ ipython
 xgboost
 seaborn
 category_encoders
+scikit-posthocs
