@@ -1,16 +1,18 @@
 from db_connection import DBConnection
-from encoding import target_encoding, binary_encoding
+from encoding import CATEGORICAL_COLUMNS
+from modeling.utils import KMeansTransformer
 
 from sklearn.experimental import enable_halving_search_cv, enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 from xgboost import XGBRegressor
 from sklearn.pipeline import Pipeline
-from sklearn.linear_model import BayesianRidge
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import BayesianRidge, LinearRegression
+from sklearn.ensemble import RandomForestRegressor, BaggingRegressor, AdaBoostRegressor
+from sklearn.tree import DecisionTreeRegressor
 from sklearn.model_selection import HalvingGridSearchCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVR
-from sklearn.metrics import root_mean_squared_error
+import category_encoders as ce
 import argparse
 import pandas as pd
 import mlflow
@@ -20,23 +22,31 @@ TOLERANCE = 0.05
 MODEL_MAPPER = {
     "random_forest": RandomForestRegressor,
     "xgboost": XGBRegressor,
-    "svm": SVR
-}
-IMPUTATION_MAPPER = {
-    "BayesianRidge": IterativeImputer(estimator=BayesianRidge(), tol=TOLERANCE),
-    "RandomForest": IterativeImputer(estimator=RandomForestRegressor(), tol=TOLERANCE),
-    "NoImputation": lambda _df: _df.dropna()
+    "svm": SVR,
+    "linear_regression": LinearRegression,  # TODO
+    "linear_regression_ensemble": BaggingRegressor(estimator=LinearRegression()),  # TODO
+    "decision_tree": DecisionTreeRegressor,  # TODO
+    "decision_tree_adaboost": AdaBoostRegressor(estimator=DecisionTreeRegressor(max_depth=3)),  # TODO
+    "linear_regression_adaboost": AdaBoostRegressor(estimator=LinearRegression()),  # TODO
 }
 ENCODING_MAPPER = {
-    "BinaryEncoding": binary_encoding,
-    "TargetEncoding": target_encoding
+    "BinaryEncoding": ce.BinaryEncoder(cols=CATEGORICAL_COLUMNS),
+    "TargetEncoding": ce.TargetEncoder(cols=CATEGORICAL_COLUMNS)
 }
+FEATURES_KMEANS = [
+    "QuantidadeComponente",
+    "BitolaCaboAterramentoCarcaca [mm2]",
+    "BitolaCabosDeLigacao [mm2]",
+    "DiametroExternoEstator [mm]",
+    "DiametroUsinadoRotor [mm]",
+    "ComprimentoTotalPacote [mm]",
+]
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model"     , choices=MODEL_MAPPER.keys()                 , type=str, help="Model to use"            )
-    parser.add_argument("--imputation", choices=IMPUTATION_MAPPER.keys()            , type=str, help="Imputation method to use")
+    parser.add_argument("--imputation", action='store_true'                                   , help="Use imputation or not"   )
     parser.add_argument("--encoding"  , choices=("BinaryEncoding", "TargetEncoding"), type=str, help="Encoding method to use"  )
     parser.add_argument("--params"                                                  , type=json.loads,
                         help=""" Parameters for the model. E.g, '{"learning_rate": [0.01, 0.1], "n_estimators": [50, 100]}' """             )
@@ -50,26 +60,28 @@ if __name__ == "__main__":
     mlflow.set_experiment(experiment_name=args.experiment_name)
 
     with mlflow.start_run(run_name=args.run_name):
-        # seed = hash(args.run_name + args.experiment_name)
-        seed = 265894
-        steps = []
-        mlflow.log_param("seed", seed)
-
         db_connection = DBConnection()
         df = db_connection.get_dataframe()
-        df = ENCODING_MAPPER[args.encoding](df)
-        imputer = IMPUTATION_MAPPER[args.imputation]
-        if not isinstance(imputer, IterativeImputer):
-            df = imputer(df)
-        else:
-            steps.append(("imputer", imputer))
-        y = df["CustoIndustrial"].to_numpy(dtype=float)
-        x = df.drop("CustoIndustrial", axis=1).to_numpy(dtype=float)
+        df = df.rename(str, axis="columns")
+        if not args.imputation:
+            df = df.dropna()
+        y = df["CustoIndustrial"]
+        x = df.drop("CustoIndustrial", axis=1)
 
-        scaler = StandardScaler()
-        model = MODEL_MAPPER[args.model]()#random_state=seed
-        steps.extend([("scaler", scaler), ("model", model)])
+        steps = (
+            [
+                ("encoder", ENCODING_MAPPER[args.encoding]),  # output - dataframe with NaNs
+                ("scaler", StandardScaler())  # output - numpy array with NaNs
+            ] +
+            ["imputer", IterativeImputer(tol=TOLERANCE)] if args.imputation else [] +  # output - numpy array w/out NaNs
+            [
+                ("kmeans", KMeansTransformer(tuple(x.columns.get_loc(feat) for feat in FEATURES_KMEANS))),
+                ("model", MODEL_MAPPER[args.model]())
+            ]
+        )
         pipeline = Pipeline(steps=steps)
+        param_grid = {"model__" + key: value for key, value in args.params.items()}
+        param_grid.update({"imputer__estimator": [RandomForestRegressor(), BayesianRidge()]})
         search = HalvingGridSearchCV(
             estimator=pipeline,
             scoring='neg_root_mean_squared_error',
