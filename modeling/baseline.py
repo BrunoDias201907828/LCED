@@ -30,3 +30,10 @@ with mlflow.start_run(run_name="linear"):
     scores = cross_val_score(model, x, y, cv = 5, scoring='neg_root_mean_squared_error')
     mlflow.log_metric("rmse", scores.mean())
     mlflow.log_metric("rmse_std", scores.std())
+
+    columns = ["mean_test_score", "iter",
+               "split0_test_score", "split1_test_score", "split2_test_score", "split3_test_score", "split4_test_score"]
+    row = [scores.mean(), 0, *scores]
+    df_mlflow = pd.DataFrame([row], columns=columns)
+    df_mlflow.to_csv("cv_results.csv")
+    mlflow.log_artifact('cv_results.csv')
