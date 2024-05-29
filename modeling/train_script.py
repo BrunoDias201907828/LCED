@@ -21,11 +21,11 @@ import os
 pd.set_option('future.no_silent_downcasting', True)
 TOLERANCE = 0.05
 MODEL_MAPPER = {
-    "linear_regression": LinearRegression,  # TODO
-    "elastic_net": ElasticNet,  # TODO - l1_ratio 0, 0.5, 1 (ridge, elastic, lasso)
-    "decision_tree": DecisionTreeRegressor,  # TODO
-    "bayesian_ridge": BayesianRidge,  # TODO
-    "sgd": SGDRegressor,  # TODO
+    "linear_regression": LinearRegression,
+    "elastic_net": ElasticNet,
+    "decision_tree": DecisionTreeRegressor,
+    "bayesian_ridge": BayesianRidge,
+    "sgd": SGDRegressor,
 
     "random_forest": RandomForestRegressor,
     "xgboost": XGBRegressor,
@@ -55,16 +55,16 @@ if __name__ == "__main__":
     parser.add_argument("--external"  , action='store_true'                                   , help="Include external data"   )
     parser.add_argument("--encoding"  , choices=("BinaryEncoding", "TargetEncoding"), type=str, help="Encoding method to use"  )
     parser.add_argument("--params_path"                                             , type=str, help="Parameters for the model")
-    parser.add_argument("--run_name"                                                , type=str, help="Name of the run"         )
-    parser.add_argument("--experiment_name"                                         , type=str, help="Name of the experiment"  )
+    parser.add_argument("--run"                                                , type=str, help="Name of the run"         )
+    parser.add_argument("--experiment"                                         , type=str, help="Name of the experiment"  )
     args = parser.parse_args()
     # example:
     # python modeling/train_script.py --model random_forest --imputation NoImputation --encoding TargetEncoding --params '{"n_estimators": [10, 100, 1000], "max_depth": [3, 5, 10]}' --run_name random_forest --experiment_name default
 
     mlflow.set_tracking_uri("http://localhost:5000")
-    mlflow.set_experiment(experiment_name=args.experiment_name)
+    mlflow.set_experiment(experiment_name=args.experiment)
 
-    with mlflow.start_run(run_name=args.run_name):
+    with mlflow.start_run(run_name=args.run):
         db_connection = DBConnection()
         df = db_connection.get_dataframe(include_external=args.external)
         df = df.rename(str, axis="columns")
@@ -89,7 +89,7 @@ if __name__ == "__main__":
             params = json.load(f)
         param_grid = {"model__" + key: value for key, value in params.items()}
         if args.imputation:
-            param_grid.update({"imputer__estimator": [RandomForestRegressor(), BayesianRidge()]})
+            param_grid.update({"imputer__estimator": [RandomForestRegressor(max_depth=3), BayesianRidge()]})
 
         search = HalvingGridSearchCV(
             estimator=pipeline,
