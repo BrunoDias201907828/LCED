@@ -18,6 +18,7 @@ import pandas as pd
 import mlflow
 import json
 import os
+pd.set_option('future.no_silent_downcasting', True)
 TOLERANCE = 0.05
 MODEL_MAPPER = {
     "linear_regression": LinearRegression,  # TODO
@@ -77,7 +78,7 @@ if __name__ == "__main__":
                 ("encoder", ENCODING_MAPPER[args.encoding]),  # output - dataframe with NaNs
                 ("scaler", StandardScaler())  # output - numpy array with NaNs
             ] +
-            (["imputer", IterativeImputer(tol=TOLERANCE)] if args.imputation else []) +  # output - numpy array w/out NaNs
+            ([("imputer", IterativeImputer(tol=TOLERANCE, estimator=None))] if args.imputation else []) +  # output - numpy array w/out NaNs
             [
                 ("kmeans", KMeansTransformer(tuple(x.columns.get_loc(feat) for feat in FEATURES_KMEANS))),
                 ("model", MODEL_MAPPER[args.model]())
@@ -89,8 +90,7 @@ if __name__ == "__main__":
         param_grid = {"model__" + key: value for key, value in params.items()}
         if args.imputation:
             param_grid.update({"imputer__estimator": [RandomForestRegressor(), BayesianRidge()]})
-        from IPython import embed
-        embed()
+
         search = HalvingGridSearchCV(
             estimator=pipeline,
             scoring='neg_root_mean_squared_error',
