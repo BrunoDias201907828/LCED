@@ -6,7 +6,7 @@ from sklearn.experimental import enable_halving_search_cv, enable_iterative_impu
 from sklearn.impute import IterativeImputer
 from xgboost import XGBRegressor
 from sklearn.pipeline import Pipeline
-from sklearn.linear_model import BayesianRidge, LinearRegression
+from sklearn.linear_model import BayesianRidge, LinearRegression, ElasticNet, SGDRegressor
 from sklearn.ensemble import RandomForestRegressor, BaggingRegressor, AdaBoostRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.model_selection import HalvingGridSearchCV
@@ -20,14 +20,18 @@ import json
 import os
 TOLERANCE = 0.05
 MODEL_MAPPER = {
+    "linear_regression": LinearRegression,  # TODO
+    "elastic_net": ElasticNet,  # TODO - l1_ratio 0, 0.5, 1 (ridge, elastic, lasso)
+    "decision_tree": DecisionTreeRegressor,  # TODO
+    "bayesian_ridge": BayesianRidge,  # TODO
+    "sgd": SGDRegressor,  # TODO
+
     "random_forest": RandomForestRegressor,
     "xgboost": XGBRegressor,
     "svm": SVR,
-    "linear_regression": LinearRegression,  # TODO
-    "linear_regression_ensemble": BaggingRegressor(estimator=LinearRegression()),  # TODO
-    "decision_tree": DecisionTreeRegressor,  # TODO
-    "decision_tree_adaboost": AdaBoostRegressor(estimator=DecisionTreeRegressor(max_depth=3)),  # TODO
-    "linear_regression_adaboost": AdaBoostRegressor(estimator=LinearRegression()),  # TODO
+
+    "bagging": BaggingRegressor(estimator=LinearRegression()),  # TODO - choose estimator
+    "adaboost": AdaBoostRegressor(estimator=DecisionTreeRegressor(max_depth=3)),  # TODO - choose estimator
 }
 ENCODING_MAPPER = {
     "BinaryEncoding": ce.BinaryEncoder(cols=CATEGORICAL_COLUMNS),
@@ -47,9 +51,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model"     , choices=MODEL_MAPPER.keys()                 , type=str, help="Model to use"            )
     parser.add_argument("--imputation", action='store_true'                                   , help="Use imputation or not"   )
+    parser.add_argument("--external"  , action='store_true'                                   , help="Include external data"   )
     parser.add_argument("--encoding"  , choices=("BinaryEncoding", "TargetEncoding"), type=str, help="Encoding method to use"  )
-    parser.add_argument("--params"                                                  , type=json.loads,
-                        help=""" Parameters for the model. E.g, '{"learning_rate": [0.01, 0.1], "n_estimators": [50, 100]}' """             )
+    parser.add_argument("--params_path"                                             , type=str, help="Parameters for the model")
     parser.add_argument("--run_name"                                                , type=str, help="Name of the run"         )
     parser.add_argument("--experiment_name"                                         , type=str, help="Name of the experiment"  )
     args = parser.parse_args()
@@ -61,7 +65,7 @@ if __name__ == "__main__":
 
     with mlflow.start_run(run_name=args.run_name):
         db_connection = DBConnection()
-        df = db_connection.get_dataframe()
+        df = db_connection.get_dataframe(include_external=args.external)
         df = df.rename(str, axis="columns")
         if not args.imputation:
             df = df.dropna()
@@ -73,19 +77,24 @@ if __name__ == "__main__":
                 ("encoder", ENCODING_MAPPER[args.encoding]),  # output - dataframe with NaNs
                 ("scaler", StandardScaler())  # output - numpy array with NaNs
             ] +
-            ["imputer", IterativeImputer(tol=TOLERANCE)] if args.imputation else [] +  # output - numpy array w/out NaNs
+            (["imputer", IterativeImputer(tol=TOLERANCE)] if args.imputation else []) +  # output - numpy array w/out NaNs
             [
                 ("kmeans", KMeansTransformer(tuple(x.columns.get_loc(feat) for feat in FEATURES_KMEANS))),
                 ("model", MODEL_MAPPER[args.model]())
             ]
         )
         pipeline = Pipeline(steps=steps)
-        param_grid = {"model__" + key: value for key, value in args.params.items()}
-        param_grid.update({"imputer__estimator": [RandomForestRegressor(), BayesianRidge()]})
+        with open(args.params_path, "r") as f:
+            params = json.load(f)
+        param_grid = {"model__" + key: value for key, value in params.items()}
+        if args.imputation:
+            param_grid.update({"imputer__estimator": [RandomForestRegressor(), BayesianRidge()]})
+        from IPython import embed
+        embed()
         search = HalvingGridSearchCV(
             estimator=pipeline,
             scoring='neg_root_mean_squared_error',
-            param_grid={"model__" + key: value for key, value in args.params.items()},
+            param_grid=param_grid,
             n_jobs=-1,
             verbose=2
         ).fit(x, y)

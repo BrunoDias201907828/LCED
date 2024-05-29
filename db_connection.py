@@ -46,14 +46,16 @@ class DBConnection:
     def _get_dataframe_cleaned(self):
         return clean_dataframe(self._get_dataframe_raw())
 
-    def get_dataframe(self):
+    def get_dataframe(self, include_external=True):
         df = self._get_dataframe_cleaned()
         extractor = FeatureExtractor()
-        df_ext = extractor.extract_features()
-        return (
-            pd.merge(df, df_ext, left_on="DataCriacao", right_index=True, how="left").
-            drop(columns=["DataCriacao"])
-        )
+        if include_external:
+            df_ext = extractor.extract_features()
+            return (
+                pd.merge(df, df_ext, left_on="DataCriacao", right_index=True, how="left").
+                drop(columns=["DataCriacao"])
+            )
+        return df.drop(columns=["DataCriacao"])
 
 
 if __name__ == "__main__":
