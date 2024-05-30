@@ -1,0 +1,8 @@
+{
+  "loss":  ["squared_error", "huber", "epsilon_insensitive", "squared_epsilon_insensitive"],
+  "penalty": ["l1", "l2", "elasticnet"],
+  "l1_ratio": [0.15, 0.5, 0.85],
+  "alpha": [0.00001, 0.0001, 0.001, 0.01, 0.1],
+  "learning_rate": ["constant", "optimal", "invscaling", "adaptive"],
+  "eta0": [0.0001, 0.001, 0.01, 0.1]
+}
