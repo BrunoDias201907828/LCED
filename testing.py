@@ -37,12 +37,11 @@ def run_script(
     return True
 
 
-if __name__ == "__main__":
+def run_single_regressor_experiment():
     experiment = "SingleRegressor"
     script_path = "modeling/train_script.py"
     models = ["linear_regression", "elastic_net", "decision_tree", "bayesian_ridge", "sgd"]
 
-    # Linear Regression
     for model in models:
         model_name_cap = model.replace("_", " ").title().replace(" ", "")
         params_file = f"modeling/parameters_{model}.json"
@@ -55,3 +54,31 @@ if __name__ == "__main__":
                        params_file, f"{model_name_cap}_{encoding}_External", experiment)
             run_script(script_path, model, True, True, encoding,
                        params_file, f"{model_name_cap}_{encoding}_Imputation_External", experiment)
+
+
+def run_standard_experiment():
+    experiment = "Standard"
+    script_path = "modeling/train_script.py"
+    models = ["random_forest", "xgboost", "svr"]
+
+    for model in models:
+        model_name_cap = model.replace("_", " ").title().replace(" ", "")
+        params_file = f"modeling/parameters_{model}.json"
+        run_script(script_path, model, False, True, "BinaryEncoding",
+                   params_file, model_name_cap, experiment)
+
+
+def run_ensemble_experiment():
+    experiment = "Standard"
+    script_path = "modeling/train_script.py"
+    models = ["bagging", "adaboost"]
+
+    for model in models:
+        model_name_cap = model.replace("_", " ").title().replace(" ", "")
+        params_file = f"modeling/parameters_{model}.json"
+        run_script(script_path, model, False, True, "BinaryEncoding",
+                   params_file, model_name_cap, experiment)
+
+
+if __name__ == "__main__":
+    run_standard_experiment()

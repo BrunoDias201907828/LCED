@@ -3,13 +3,14 @@ from encoding import CATEGORICAL_COLUMNS
 from modeling.utils import KMeansTransformer
 
 from sklearn.experimental import enable_halving_search_cv, enable_iterative_imputer
+from sklearn.feature_selection import SequentialFeatureSelector
 from sklearn.impute import IterativeImputer
 from xgboost import XGBRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import BayesianRidge, LinearRegression, ElasticNet, SGDRegressor
 from sklearn.ensemble import RandomForestRegressor, BaggingRegressor, AdaBoostRegressor
 from sklearn.tree import DecisionTreeRegressor
-from sklearn.model_selection import HalvingGridSearchCV
+from sklearn.model_selection import HalvingGridSearchCV, GridSearchCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVR
 import category_encoders as ce
@@ -29,10 +30,10 @@ MODEL_MAPPER = {
 
     "random_forest": RandomForestRegressor,
     "xgboost": XGBRegressor,
-    "svm": SVR,
+    "svr": SVR,
 
-    "bagging": BaggingRegressor(estimator=LinearRegression()),  # TODO - choose estimator
-    "adaboost": AdaBoostRegressor(estimator=DecisionTreeRegressor(max_depth=3)),  # TODO - choose estimator
+    "bagging": BaggingRegressor(estimator=BayesianRidge(lambda_1=0.001, lambda_2=1e-6, alpha_1=1e-7, alpha_2=0.001)),
+    "adaboost": AdaBoostRegressor(estimator=BayesianRidge(lambda_1=0.001, lambda_2=1e-6, alpha_1=1e-7, alpha_2=0.001)),
 }
 ENCODING_MAPPER = {
     "BinaryEncoding": ce.BinaryEncoder(cols=CATEGORICAL_COLUMNS),
@@ -50,13 +51,14 @@ FEATURES_KMEANS = [
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model"     , choices=MODEL_MAPPER.keys()                 , type=str, help="Model to use"            )
-    parser.add_argument("--imputation", action='store_true'                                   , help="Use imputation or not"   )
-    parser.add_argument("--external"  , action='store_true'                                   , help="Include external data"   )
-    parser.add_argument("--encoding"  , choices=("BinaryEncoding", "TargetEncoding"), type=str, help="Encoding method to use"  )
-    parser.add_argument("--params_path"                                             , type=str, help="Parameters for the model")
-    parser.add_argument("--run"                                                , type=str, help="Name of the run"         )
-    parser.add_argument("--experiment"                                         , type=str, help="Name of the experiment"  )
+    parser.add_argument("--model"            , choices=MODEL_MAPPER.keys()                 , type=str, help="Model to use"             )
+    parser.add_argument("--imputation"       , action='store_true'                                   , help="Use imputation or not"    )
+    parser.add_argument("--external"         , action='store_true'                                   , help="Include external data"    )
+    parser.add_argument("--feature_selection", action='store_true'                                   , help="Perform Feature Selection")
+    parser.add_argument("--encoding"         , choices=("BinaryEncoding", "TargetEncoding"), type=str, help="Encoding method to use"   )
+    parser.add_argument("--params_path"                                                    , type=str, help="Parameters for the model" )
+    parser.add_argument("--run"                                                            , type=str, help="Name of the run"          )
+    parser.add_argument("--experiment"                                                     , type=str, help="Name of the experiment"   )
     args = parser.parse_args()
     # example:
     # python modeling/train_script.py --model random_forest --imputation NoImputation --encoding TargetEncoding --params '{"n_estimators": [10, 100, 1000], "max_depth": [3, 5, 10]}' --run_name random_forest --experiment_name default
@@ -73,12 +75,18 @@ if __name__ == "__main__":
         y = df["CustoIndustrial"]
         x = df.drop("CustoIndustrial", axis=1)
 
+        feature_selector = SequentialFeatureSelector(
+            estimator=BayesianRidge(lambda_1=0.001, lambda_2=1e-6, alpha_1=1e-7, alpha_2=0.001),
+            tol=0.00005,
+            direction="backward",
+        )
         steps = (
             [
                 ("encoder", ENCODING_MAPPER[args.encoding]),  # output - dataframe with NaNs
                 ("scaler", StandardScaler())  # output - numpy array with NaNs
             ] +
             ([("imputer", IterativeImputer(tol=TOLERANCE, estimator=None))] if args.imputation else []) +  # output - numpy array w/out NaNs
+            ([("feature_selector", feature_selector)] if args.feature_selection else []) +
             [
                 ("kmeans", KMeansTransformer(tuple(x.columns.get_loc(feat) for feat in FEATURES_KMEANS))),
                 ("model", MODEL_MAPPER[args.model]())
@@ -91,7 +99,9 @@ if __name__ == "__main__":
         if args.imputation:
             param_grid.update({"imputer__estimator": [RandomForestRegressor(max_depth=3), BayesianRidge()]})
 
-        search = HalvingGridSearchCV(
+        # search_method = HalvingGridSearchCV
+        search_method = GridSearchCV
+        search = search_method(
             estimator=pipeline,
             scoring='neg_root_mean_squared_error',
             param_grid=param_grid,
