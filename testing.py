@@ -69,7 +69,7 @@ def run_standard_experiment():
 
 
 def run_ensemble_experiment():
-    experiment = "Standard"
+    experiment = "Ensemble"
     script_path = "modeling/train_script.py"
     models = ["bagging", "adaboost"]
 

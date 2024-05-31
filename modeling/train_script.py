@@ -22,15 +22,15 @@ import os
 pd.set_option('future.no_silent_downcasting', True)
 TOLERANCE = 0.05
 MODEL_MAPPER = {
-    "linear_regression": LinearRegression,
-    "elastic_net": ElasticNet,
-    "decision_tree": DecisionTreeRegressor,
-    "bayesian_ridge": BayesianRidge,
-    "sgd": SGDRegressor,
+    "linear_regression": LinearRegression(),
+    "elastic_net": ElasticNet(),
+    "decision_tree": DecisionTreeRegressor(),
+    "bayesian_ridge": BayesianRidge(),
+    "sgd": SGDRegressor(),
 
-    "random_forest": RandomForestRegressor,
-    "xgboost": XGBRegressor,
-    "svr": SVR,
+    "random_forest": RandomForestRegressor(),
+    "xgboost": XGBRegressor(),
+    "svr": SVR(),
 
     "bagging": BaggingRegressor(estimator=BayesianRidge(lambda_1=0.001, lambda_2=1e-6, alpha_1=1e-7, alpha_2=0.001)),
     "adaboost": AdaBoostRegressor(estimator=BayesianRidge(lambda_1=0.001, lambda_2=1e-6, alpha_1=1e-7, alpha_2=0.001)),
@@ -76,8 +76,8 @@ if __name__ == "__main__":
         x = df.drop("CustoIndustrial", axis=1)
 
         feature_selector = SequentialFeatureSelector(
-            estimator=BayesianRidge(lambda_1=0.001, lambda_2=1e-6, alpha_1=1e-7, alpha_2=0.001),
-            tol=0.00005,
+            estimator=DecisionTreeRegressor(criterion="friedman_mse", min_samples_split=10, min_samples_leaf=2),
+            tol=0,
             direction="backward",
         )
         steps = (
@@ -89,7 +89,7 @@ if __name__ == "__main__":
             ([("feature_selector", feature_selector)] if args.feature_selection else []) +
             [
                 ("kmeans", KMeansTransformer(tuple(x.columns.get_loc(feat) for feat in FEATURES_KMEANS))),
-                ("model", MODEL_MAPPER[args.model]())
+                ("model", MODEL_MAPPER[args.model])
             ]
         )
         pipeline = Pipeline(steps=steps)
