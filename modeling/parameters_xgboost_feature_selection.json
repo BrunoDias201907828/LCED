@@ -1,0 +1,20 @@
+{
+  "n_estimators": [
+    1000
+  ],
+  "max_leaves": [
+    0
+  ],
+  "learning_rate": [
+    0.1
+  ],
+  "gamma": [
+    0
+  ],
+  "reg_lambda": [
+    1
+  ],
+  "grow_policy": [
+    "lossguide"
+  ]
+}

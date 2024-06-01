@@ -81,6 +81,9 @@ if __name__ == "__main__":
         db_connection = DBConnection()
         df = db_connection.get_dataframe(include_external=args.external)
         df = df.rename(str, axis="columns")
+        # Reorder columns so that the kmeans is performed with the correct columns
+        no_kmeans_columns = [c for c in df.columns if c not in FEATURES_KMEANS]
+        df = df[FEATURES_KMEANS + no_kmeans_columns]
         if not args.imputation:
             df = df.dropna()
         y = df["CustoIndustrial"]
