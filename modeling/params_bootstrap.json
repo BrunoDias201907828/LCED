@@ -1,0 +1,1 @@
+{"max_leaves": 0, "grow_policy": "lossguide", "n_estimators": 1000, "gamma": 0, "reg_lambda": 1, "learning_rate": 0.1}
