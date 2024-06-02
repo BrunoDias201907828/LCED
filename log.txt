@@ -1,0 +1,125 @@
+Error running modeling/train_script.py: 
+[*********************100%%**********************]  1 of 1 completed
+
+[*********************100%%**********************]  1 of 1 completed
+Traceback (most recent call last):
+  File "/git-repos/modeling/train_script.py", line 88, in <module>
+    with open(args.params_path, "r") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'parameters_decision_tree.json'
+
+Error running modeling/train_script.py: 
+[*********************100%%**********************]  1 of 1 completed
+
+[*********************100%%**********************]  1 of 1 completed
+Traceback (most recent call last):
+  File "/git-repos/modeling/train_script.py", line 88, in <module>
+    with open(args.params_path, "r") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'parameters_decision_tree.json'
+
+Error running modeling/train_script.py: 
+[*********************100%%**********************]  1 of 1 completed
+
+[*********************100%%**********************]  1 of 1 completed
+Traceback (most recent call last):
+  File "/git-repos/modeling/train_script.py", line 88, in <module>
+    with open(args.params_path, "r") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'parameters_decision_tree.json'
+
+Error running modeling/train_script.py: 
+[*********************100%%**********************]  1 of 1 completed
+
+[*********************100%%**********************]  1 of 1 completed
+Traceback (most recent call last):
+  File "/git-repos/modeling/train_script.py", line 88, in <module>
+    with open(args.params_path, "r") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'parameters_linear_regression.json'
+
+Error running modeling/train_script.py: 
+[*********************100%%**********************]  1 of 1 completed
+
+[*********************100%%**********************]  1 of 1 completed
+Traceback (most recent call last):
+  File "/git-repos/modeling/train_script.py", line 88, in <module>
+    with open(args.params_path, "r") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'parameters_linear_regression.json'
+
+Error running modeling/train_script.py: 
+[*********************100%%**********************]  1 of 1 completed
+
+[*********************100%%**********************]  1 of 1 completed
+Traceback (most recent call last):
+  File "/git-repos/modeling/train_script.py", line 88, in <module>
+    with open(args.params_path, "r") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'parameters_linear_regression.json'
+
+Error running modeling/train_script.py: 
+[*********************100%%**********************]  1 of 1 completed
+
+[*********************100%%**********************]  1 of 1 completed
+Traceback (most recent call last):
+  File "/git-repos/modeling/train_script.py", line 88, in <module>
+    with open(args.params_path, "r") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'parameters_linear_regression.json'
+
+Error running modeling/train_script.py: 
+[*********************100%%**********************]  1 of 1 completed
+
+[*********************100%%**********************]  1 of 1 completed
+Traceback (most recent call last):
+  File "/git-repos/modeling/train_script.py", line 88, in <module>
+    with open(args.params_path, "r") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'parameters_linear_regression.json'
+
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0
+Finished running modeling/train_script.py with return code 0

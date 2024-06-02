@@ -10,20 +10,34 @@ if __name__ == "__main__":
     mlflow.set_tracking_uri("http://localhost:5000")
     mlflow_infos = [
         [
-            "rf_t", "rf_b", "rf_tb", "rf_bb", "xg_t", "xg_b", "xg_tb", "xg_bb",
-            "lsvr_t", "lsvr_b", "lsvr_tb", "lsvr_bb", "linear"
-        ],
-        [
-            "linear", "lsvr_t", "rf_t", "xg_bb"
+            ("SingleRegressor", "LinearRegression_TargetEncoding"),
+            ("SingleRegressor", "ElasticNet_BinaryEncoding_External"),
+            ("SingleRegressor", "DecisionTree_BinaryEncoding"),
+            ("SingleRegressor", "BayesianRidge_BinaryEncoding_External"),
+            ("SingleRegressor", "Sgd_BinaryEncoding_External"),
+            ("Ensemble", "Bagging"),
+            ("Ensemble", "Adaboost_3rd"),
+            ("Standard", "RandomForest"),
+            ("Standard", "Xgboost"),
+            ("Standard", "Svr"),
         ]
     ]
-    for mlflow_info, suffix in zip(mlflow_infos, ["", "compact"]):
+    # mlflow_infos = [
+    #     [
+    #         "rf_t", "rf_b", "rf_tb", "rf_bb", "xg_t", "xg_b", "xg_tb", "xg_bb",
+    #         "lsvr_t", "lsvr_b", "lsvr_tb", "lsvr_bb", "linear"
+    #     ],
+    #     [
+    #         "", "lsvr_t", "rf_t", "xg_bb"
+    #     ]
+    # ]
+    for mlflow_info, suffix in zip(mlflow_infos, [""]):
         data = []
         i = 0
-        for run_name in mlflow_info:
+        for experiment, run_name in mlflow_info:
             i += 1
             print(i / len(mlflow_info))
-            mlflow.set_experiment(experiment_name=run_name)
+            mlflow.set_experiment(experiment_name=experiment)
             runs = mlflow.search_runs()
             runs = runs[runs['tags.mlflow.runName'] == run_name]
             run_id = runs.iloc[0].run_id
@@ -31,10 +45,15 @@ if __name__ == "__main__":
                 mlflow.artifacts.download_artifacts(artifact_path="cv_results.csv", dst_path=temp_dir, run_id=run_id)
                 downloaded_csv_path = os.path.join(temp_dir, "cv_results.csv")
                 df = pd.read_csv(downloaded_csv_path)
-                _df = df.loc[
-                    (df.iter == df.iter.max()) &
-                    (df.mean_test_score == df.loc[df.iter == df.iter.max()].mean_test_score.max())
-                ]
+                if experiment == "Ensemble":
+                    _df = df.loc[
+                        df.mean_test_score == df.mean_test_score.max()
+                    ]
+                else:
+                    _df = df.loc[
+                        (df.iter == df.iter.max()) &
+                        (df.mean_test_score == df.loc[df.iter == df.iter.max()].mean_test_score.max())
+                    ]
                 columns = [f"split{i}_test_score" for i in range(5)]
                 _data = [(i, run_name if run_name != "linear" else "BASELINE", _df[col].values[0]) for i, col in enumerate(columns)]
                 data.extend(_data)
