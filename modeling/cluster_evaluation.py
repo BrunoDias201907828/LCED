@@ -72,6 +72,7 @@ if __name__ == "__main__":
 
 
     # python3 modeling/bootstrap.py --model xgboost --external --encoding BinaryEncoding --params modeling/params_bootstrap.json --run_name xgboost_best --experiment_name bootstrap
+    # python3 modeling/cluster_evaluation.py --model xgboost --external --encoding BinaryEncoding --params modeling/params_bootstrap.json --run_name test_cluster --experiment_name test_cluster
 
 
     mlflow.set_tracking_uri("http://localhost:5000")
@@ -101,13 +102,14 @@ if __name__ == "__main__":
             ]
         )
         pipeline = Pipeline(steps=steps)
+
         with open(args.params_path, "r") as f:
             params = json.load(f)
         param_grid = {"model__" + key: value for key, value in params.items()}
         if args.imputation:
             param_grid.update({"imputer__estimator": [RandomForestRegressor(), BayesianRidge()]})
 
-
+        
         n_iterations = 5000
         mae_scores = []
         mape_scores = []
@@ -123,8 +125,23 @@ if __name__ == "__main__":
             y_test = y.loc[~y.index.isin(y_train.index)]
 
             pipeline.fit(x_train, y_train)
+            pipeline_cluster = Pipeline(steps=steps[:-1])
+            x_test_cluster = pipeline_cluster.transform(x_test)
+            cluster = x_test_cluster[:, -1]
             y_pred = pipeline.predict(x_test)
+            
+            k_means = pipeline["kmeans"]
+            centroids = k_means.kmeans.cluster_centers_
 
+            if np.sum(centroids[0]) > np.sum(centroids[1]):
+                cluster_names = ["small", "big"]
+            else:
+                cluster_names = ["big", "small"]
+            
+            
+
+            from IPython import embed; embed()
+            
             mae = mean_absolute_error(y_test, y_pred)
             mape = mean_absolute_percentage_error(y_test, y_pred)
             r2 = r2_score(y_test, y_pred)
