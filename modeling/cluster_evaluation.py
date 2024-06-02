@@ -109,12 +109,11 @@ if __name__ == "__main__":
         if args.imputation:
             param_grid.update({"imputer__estimator": [RandomForestRegressor(), BayesianRidge()]})
 
-        
         n_iterations = 5000
-        mae_scores = []
-        mape_scores = []
-        r2_scores = []
-        rmse_scores = []
+        mae_scores = {"all": [], "small": [], "big": []}
+        mape_scores = {"all": [], "small": [], "big": []}
+        r2_scores = {"all": [], "small": [], "big": []}
+        rmse_scores = {"all": [], "small": [], "big": []}
         results = []
 
         for i in range(n_iterations):
@@ -137,68 +136,76 @@ if __name__ == "__main__":
                 cluster_names = ["small", "big"]
             else:
                 cluster_names = ["big", "small"]
-            
-            
 
-            from IPython import embed; embed()
-            
-            mae = mean_absolute_error(y_test, y_pred)
-            mape = mean_absolute_percentage_error(y_test, y_pred)
-            r2 = r2_score(y_test, y_pred)
-            rmse = root_mean_squared_error(y_test, y_pred)
+            for subset in ["all", "small", "big"]:
+                if subset == "all":
+                    _y_test = y_test
+                    _y_pred = y_pred
+                elif subset == "small":
+                    index = cluster_names.index("small")
+                    _y_test = y_test[cluster == index]
+                    _y_pred = y_pred[cluster == index]
+                elif subset == "big":
+                    index = cluster_names.index("big")
+                    _y_test = y_test[cluster == index]
+                    _y_pred = y_pred[cluster == index]
 
-            mae_scores.append(mae)
-            mape_scores.append(mape)
-            r2_scores.append(r2)
-            rmse_scores.append(rmse)
+                mae = mean_absolute_error(_y_test, _y_pred)
+                mape = mean_absolute_percentage_error(_y_test, _y_pred)
+                r2 = r2_score(_y_test, _y_pred)
+                rmse = root_mean_squared_error(_y_test, _y_pred)
 
-            results.append({
-                "iteration": i,
-                "mae": mae,
-                "mape": mape,
-                "r2": r2,
-                "rmse": rmse
-            })
+                mae_scores[subset].append(mae)
+                mape_scores[subset].append(mape)
+                r2_scores[subset].append(r2)
+                rmse_scores[subset].append(rmse)
+
+                results[subset].append({
+                    "subset": subset,
+                    "iteration": i,
+                    "mae": mae,
+                    "mape": mape,
+                    "r2": r2,
+                    "rmse": rmse
+                })
 
             # mlflow.log_metric(f"mse_bootstrap_{i}", mae)
             # mlflow.log_metric(f"mape_bootstrap_{i}", mape)
             # mlflow.log_metric(f"r2_bootstrap_{i}", r2)
             # mlflow.log_metric(f"rmse_bootstrap_{i}", rmse)
 
-        mae_lower, mae_upper = calculate_confidence_intervals(mae_scores)
-        mape_lower, mape_upper = calculate_confidence_intervals(mape_scores)
-        r2_lower, r2_upper = calculate_confidence_intervals(r2_scores)
-        rmse_lower, rmse_upper = calculate_confidence_intervals(rmse_scores)
-
         mlflow.log_param("model", args.model)
         mlflow.log_param("encoding", args.encoding)
         mlflow.log_param("imputation", args.imputation)
         mlflow.log_param("params", params)
-        mlflow.log_metric("mean_mse", np.mean(mae_scores))
-        mlflow.log_metric("mean_mape", np.mean(mape_scores))
-        mlflow.log_metric("mean_r2", np.mean(r2_scores))
-        mlflow.log_metric("mean_rmse", np.mean(rmse_scores))
-
-        mlflow.log_metric("mae_ci_lower", mae_lower)
-        mlflow.log_metric("mae_ci_upper", mae_upper)
-        mlflow.log_metric("mape_ci_lower", mape_lower)
-        mlflow.log_metric("mape_ci_upper", mape_upper)
-        mlflow.log_metric("r2_ci_lower", r2_lower)
-        mlflow.log_metric("r2_ci_upper", r2_upper)
-        mlflow.log_metric("rmse_ci_lower", rmse_lower)
-        mlflow.log_metric("rmse_ci_upper", rmse_upper)
-
         mlflow.sklearn.log_model(pipeline, "model")
+
+        for subset in ["all", "small", "big"]:
+            mae_lower, mae_upper = calculate_confidence_intervals(mae_scores[subset])
+            mape_lower, mape_upper = calculate_confidence_intervals(mape_scores[subset])
+            r2_lower, r2_upper = calculate_confidence_intervals(r2_scores[subset])
+            rmse_lower, rmse_upper = calculate_confidence_intervals(rmse_scores[subset])
+
+            mlflow.log_metric(f"mean_mse_{subset}", np.mean(mae_scores))
+            mlflow.log_metric(f"mean_mape_{subset}", np.mean(mape_scores))
+            mlflow.log_metric(f"mean_r2_{subset}", np.mean(r2_scores))
+            mlflow.log_metric(f"mean_rmse_{subset}", np.mean(rmse_scores))
+
+            mlflow.log_metric(f"mae_ci_lower_{subset}", mae_lower)
+            mlflow.log_metric(f"mae_ci_upper_{subset}", mae_upper)
+            mlflow.log_metric(f"mape_ci_lower_{subset}", mape_lower)
+            mlflow.log_metric(f"mape_ci_upper_{subset}", mape_upper)
+            mlflow.log_metric(f"r2_ci_lower_{subset}", r2_lower)
+            mlflow.log_metric(f"r2_ci_upper_{subset}", r2_upper)
+            mlflow.log_metric(f"rmse_ci_lower_{subset}", rmse_lower)
+            mlflow.log_metric(f"rmse_ci_upper_{subset}", rmse_upper)
 
         results_df = pd.DataFrame(results)
         results_df.to_csv('results.csv', index=False)
         mlflow.log_artifact('results.csv')
 
-        print(f"Model: {args.model}, Mean MAE: {np.mean(mae_scores)}, Mean MAPE: {np.mean(mape_scores)} , Mean R²: {np.mean(r2_scores)}, Mean RMSE: {np.mean(rmse_scores)}")
-        print(f"95% CI for MAE: [{mae_lower}, {mae_upper}]")
-        print(f"95% CI for MAPE: [{mape_lower}, {mape_upper}]")
-        print(f"95% CI for R²: [{r2_lower}, {r2_upper}]")
-        print(f"95% CI for RMSE: [{rmse_lower}, {rmse_upper}]")
-
-
-        mlflow.end_run()
+        # print(f"Model: {args.model}, Mean MAE: {np.mean(mae_scores)}, Mean MAPE: {np.mean(mape_scores)} , Mean R²: {np.mean(r2_scores)}, Mean RMSE: {np.mean(rmse_scores)}")
+        # print(f"95% CI for MAE: [{mae_lower}, {mae_upper}]")
+        # print(f"95% CI for MAPE: [{mape_lower}, {mape_upper}]")
+        # print(f"95% CI for R²: [{r2_lower}, {r2_upper}]")
+        # print(f"95% CI for RMSE: [{rmse_lower}, {rmse_upper}]")
