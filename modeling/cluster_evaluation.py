@@ -160,7 +160,7 @@ if __name__ == "__main__":
                 r2_scores[subset].append(r2)
                 rmse_scores[subset].append(rmse)
 
-                results[subset].append({
+                results.append({
                     "subset": subset,
                     "iteration": i,
                     "mae": mae,
@@ -168,12 +168,6 @@ if __name__ == "__main__":
                     "r2": r2,
                     "rmse": rmse
                 })
-
-            # mlflow.log_metric(f"mse_bootstrap_{i}", mae)
-            # mlflow.log_metric(f"mape_bootstrap_{i}", mape)
-            # mlflow.log_metric(f"r2_bootstrap_{i}", r2)
-            # mlflow.log_metric(f"rmse_bootstrap_{i}", rmse)
-
         mlflow.log_param("model", args.model)
         mlflow.log_param("encoding", args.encoding)
         mlflow.log_param("imputation", args.imputation)
@@ -186,10 +180,10 @@ if __name__ == "__main__":
             r2_lower, r2_upper = calculate_confidence_intervals(r2_scores[subset])
             rmse_lower, rmse_upper = calculate_confidence_intervals(rmse_scores[subset])
 
-            mlflow.log_metric(f"mean_mse_{subset}", np.mean(mae_scores))
-            mlflow.log_metric(f"mean_mape_{subset}", np.mean(mape_scores))
-            mlflow.log_metric(f"mean_r2_{subset}", np.mean(r2_scores))
-            mlflow.log_metric(f"mean_rmse_{subset}", np.mean(rmse_scores))
+            mlflow.log_metric(f"mean_mse_{subset}", np.mean(mae_scores[subset]))
+            mlflow.log_metric(f"mean_mape_{subset}", np.mean(mape_scores[subset]))
+            mlflow.log_metric(f"mean_r2_{subset}", np.mean(r2_scores[subset]))
+            mlflow.log_metric(f"mean_rmse_{subset}", np.mean(rmse_scores[subset]))
 
             mlflow.log_metric(f"mae_ci_lower_{subset}", mae_lower)
             mlflow.log_metric(f"mae_ci_upper_{subset}", mae_upper)
@@ -203,9 +197,3 @@ if __name__ == "__main__":
         results_df = pd.DataFrame(results)
         results_df.to_csv('results.csv', index=False)
         mlflow.log_artifact('results.csv')
-
-        # print(f"Model: {args.model}, Mean MAE: {np.mean(mae_scores)}, Mean MAPE: {np.mean(mape_scores)} , Mean R²: {np.mean(r2_scores)}, Mean RMSE: {np.mean(rmse_scores)}")
-        # print(f"95% CI for MAE: [{mae_lower}, {mae_upper}]")
-        # print(f"95% CI for MAPE: [{mape_lower}, {mape_upper}]")
-        # print(f"95% CI for R²: [{r2_lower}, {r2_upper}]")
-        # print(f"95% CI for RMSE: [{rmse_lower}, {rmse_upper}]")
