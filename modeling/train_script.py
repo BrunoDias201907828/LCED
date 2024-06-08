@@ -99,8 +99,8 @@ if __name__ == "__main__":
         if args.imputation:
             param_grid.update({"imputer__estimator": [RandomForestRegressor(max_depth=3), BayesianRidge()]})
 
-        # search_method = HalvingGridSearchCV
-        search_method = GridSearchCV
+        search_method = HalvingGridSearchCV
+        #search_method = GridSearchCV
         search = search_method(
             estimator=pipeline,
             scoring='neg_root_mean_squared_error',
