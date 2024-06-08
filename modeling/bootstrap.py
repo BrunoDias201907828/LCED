@@ -157,7 +157,7 @@ if __name__ == "__main__":
         mlflow.log_param("encoding", args.encoding)
         mlflow.log_param("imputation", args.imputation)
         mlflow.log_param("params", params)
-        mlflow.log_metric("mean_mse", np.mean(mae_scores))
+        mlflow.log_metric("mean_mae", np.mean(mae_scores))
         mlflow.log_metric("mean_mape", np.mean(mape_scores))
         mlflow.log_metric("mean_r2", np.mean(r2_scores))
         mlflow.log_metric("mean_rmse", np.mean(rmse_scores))
