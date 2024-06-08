@@ -129,13 +129,17 @@ if __name__ == "__main__":
             cluster = x_test_cluster[:, -1]
             y_pred = pipeline.predict(x_test)
             
+            from IPython import embed; embed()
+
             k_means = pipeline["kmeans"]
             centroids = k_means.kmeans.cluster_centers_
 
             if np.sum(centroids[0]) > np.sum(centroids[1]):
-                cluster_names = ["small", "big"]
-            else:
                 cluster_names = ["big", "small"]
+            else:
+                cluster_names = ["small", "big"]
+
+            embed()
 
             for subset in ["all", "small", "big"]:
                 if subset == "all":
@@ -180,7 +184,7 @@ if __name__ == "__main__":
             r2_lower, r2_upper = calculate_confidence_intervals(r2_scores[subset])
             rmse_lower, rmse_upper = calculate_confidence_intervals(rmse_scores[subset])
 
-            mlflow.log_metric(f"mean_mse_{subset}", np.mean(mae_scores[subset]))
+            mlflow.log_metric(f"mean_mae_{subset}", np.mean(mae_scores[subset]))
             mlflow.log_metric(f"mean_mape_{subset}", np.mean(mape_scores[subset]))
             mlflow.log_metric(f"mean_r2_{subset}", np.mean(r2_scores[subset]))
             mlflow.log_metric(f"mean_rmse_{subset}", np.mean(rmse_scores[subset]))
